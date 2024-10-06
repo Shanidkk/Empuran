@@ -85,16 +85,16 @@ class Bot(Client):
             os.execl(sys.executable, sys.executable, "bot.py")
             return 
         await self.send_message(chat_id=int(6446790411), text="restarted ❤️‍🩹")
-
+        
         if REQ_CHANNEL1 != False:           
             try:
-                _link = await self.create_chat_invite_link(chat_id=int(REQ_CHANNEL1), creates_join_request=True)
+                _link = await self.create_chat_invite_link(chat_id=int(REQ_CHANNEL1), creates_join_request=REQ_FSUB_MODE)
                 self.req_link1 = _link.invite_link
             except Exception as e:
                 logging.info(f"Make Sure REQ_CHANNEL 1 ID is correct or {e}")
         if REQ_CHANNEL2 != False:
             try:
-                _link = await self.create_chat_invite_link(chat_id=int(REQ_CHANNEL2), creates_join_request=True)
+                _link = await self.create_chat_invite_link(chat_id=int(REQ_CHANNEL2), creates_join_request=REQ_FSUB_MODE)
                 self.req_link2 = _link.invite_link
             except Exception as e:
                 logging.info(f"Make Sure REQ_CHANNEL 2 ID is correct or {e}")
