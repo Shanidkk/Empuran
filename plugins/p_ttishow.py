@@ -295,8 +295,8 @@ async def purge_req_two(bot, message):
 @Client.on_message(filters.command("totalreq") & filters.user(ADMINS))
 async def total_requests(bot, message): 
     rju = await message.reply('Fetching stats..')
-    total_one = await db.get_all_one_count()
-    total_two = await db.get_all_two_count()
+    total_one = (await bot.get_chat_invite_link(REQ_CHANNEL1, bot.req_link1)).member_count
+    total_two = (await bot.get_chat_invite_link(REQ_CHANNEL2, bot.req_link2)).member_count
     if REQ_CHANNEL1 != False: 
         req_channel1 = await bot.get_chat(REQ_CHANNEL1)
         req_channel1 = req_channel1.title
