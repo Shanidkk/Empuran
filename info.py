@@ -34,7 +34,7 @@ REQ_CHANNEL1=environ.get("REQ_CHANNEL1")
 REQ_CHANNEL1 = (int(REQ_CHANNEL1) if REQ_CHANNEL1 and id_pattern.search(REQ_CHANNEL1) else False) if REQ_CHANNEL1 is not None else None
 REQ_CHANNEL2=environ.get("REQ_CHANNEL2")
 REQ_CHANNEL2 = (int(REQ_CHANNEL2) if REQ_CHANNEL2 and id_pattern.search(REQ_CHANNEL2) else False) if REQ_CHANNEL2 is not None else None
-REQ_FSUB_MODE1 = False
+REQ_FSUB_MODE1 = True
 REQ_FSUB_MODE2 = True
 # MongoDB information
 DATABASE_URI = environ.get('DATABASE_URI', "mongodb+srv://Z:Z@cluster0.0dhmjgu.mongodb.net/?retryWrites=true&w=majority")
