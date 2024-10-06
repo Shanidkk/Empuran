@@ -1,6 +1,6 @@
 import logging
 from pyrogram.errors import InputUserDeactivated, UserNotParticipant, FloodWait, UserIsBlocked, PeerIdInvalid
-from info import REQ_CHANNEL1, REQ_CHANNEL2, LONG_IMDB_DESCRIPTION, MAX_LIST_ELM, ADMINS, REQ_FSUB_MODE
+from info import REQ_CHANNEL1, REQ_CHANNEL2, LONG_IMDB_DESCRIPTION, MAX_LIST_ELM, ADMINS, REQ_FSUB_MODE1, REQ_FSUB_MODE2
 from imdb import Cinemagoer
 import asyncio
 from pyrogram.types import Message, InlineKeyboardButton
@@ -71,7 +71,7 @@ async def check_loop_sub2(client, message):
     return False
 
 async def is_requested_one(self , message):
-    user = (await db.get_req_one(int(message.from_user.id))) if REQ_FSUB_MODE else None
+    user = (await db.get_req_one(int(message.from_user.id))) if REQ_FSUB_MODE1 else None
     if user:
         return True
     if message.from_user.id in ADMINS:
@@ -91,7 +91,7 @@ async def is_requested_one(self , message):
     return False
     
 async def is_requested_two(self, message):
-    user = (await db.get_req_two(int(message.from_user.id))) if REQ_FSUB_MODE else None
+    user = (await db.get_req_two(int(message.from_user.id))) if REQ_FSUB_MODE2 else None
     if user:
         return True
     if message.from_user.id in ADMINS:
