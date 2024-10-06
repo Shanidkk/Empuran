@@ -71,7 +71,7 @@ async def check_loop_sub2(client, message):
     return False
 
 async def is_requested_one(self , message):
-    user = await db.get_req_one(int(message.from_user.id))
+    user = (await db.get_req_one(int(message.from_user.id))) if REQ_FSUB_MODE else None
     if user:
         return True
     if message.from_user.id in ADMINS:
@@ -91,7 +91,7 @@ async def is_requested_one(self , message):
     return False
     
 async def is_requested_two(self, message):
-    user = await db.get_req_two(int(message.from_user.id))
+    user = (await db.get_req_two(int(message.from_user.id))) if REQ_FSUB_MODE else None
     if user:
         return True
     if message.from_user.id in ADMINS:
