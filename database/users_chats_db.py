@@ -11,6 +11,7 @@ class Database:
         self.grp = self.db.group
         self.req_one = self.db.reqone
         self.req_two = self.db.reqtwo
+        self.fsub = self.db.fsub
         self.chat_col = self.db.chatcol
         self.chat_col2 = self.db.chatcol2
 
@@ -215,6 +216,16 @@ class Database:
     async def delete_fsub_chat2(self, chat_id):
         await self.chat_col2.delete_one({"chat_id": chat_id})
         await self.req_two.delete_many({})
+
+    async def get_fsub_mode(self):
+        return await self.fsub.find_one({})
+
+    async def add_fsub_mode(self, mode):
+        try:
+            await self.fsub.delete_many({})
+            await self.fsub.insert_one({"mode": mode})
+        except:
+            pass
         
         
 db = Database(DATABASE_URI, DATABASE_NAME)
