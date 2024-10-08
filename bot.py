@@ -11,7 +11,7 @@ from pyrogram import Client, __version__
 from pyrogram.raw.all import layer
 from database.ia_filterdb import Media
 from database.users_chats_db import db
-from info import SESSION, API_ID, API_HASH, BOT_TOKEN, LOG_STR, REQ_CHANNEL1, REQ_CHANNEL2, LOG_CHANNEL, REQ_FSUB_MODE2, REQ_FSUB_MODE1
+from info import SESSION, API_ID, API_HASH, BOT_TOKEN, LOG_STR, REQ_CHANNEL1, REQ_CHANNEL2, LOG_CHANNEL
 from utils import temp
 from typing import Union, Optional, AsyncGenerator
 from pyrogram import types
@@ -101,13 +101,13 @@ class Bot(Client):
         
         if REQ_CHANNEL1 != False:           
             try:
-                _link = await self.create_chat_invite_link(chat_id=int(REQ_CHANNEL1), creates_join_request=REQ_FSUB_MODE1)
+                _link = await self.create_chat_invite_link(chat_id=int(REQ_CHANNEL1), creates_join_request=temp.REQ_FSUB_MODE1)
                 self.req_link1 = _link.invite_link
             except Exception as e:
                 logging.info(f"Make Sure REQ_CHANNEL 1 ID is correct or {e}")
         if REQ_CHANNEL2 != False:
             try:
-                _link = await self.create_chat_invite_link(chat_id=int(REQ_CHANNEL2), creates_join_request=REQ_FSUB_MODE2)
+                _link = await self.create_chat_invite_link(chat_id=int(REQ_CHANNEL2), creates_join_request=temp.REQ_FSUB_MODE2)
                 self.req_link2 = _link.invite_link
             except Exception as e:
                 logging.info(f"Make Sure REQ_CHANNEL 2 ID is correct or {e}")
