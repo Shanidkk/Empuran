@@ -901,19 +901,21 @@ async def get_fsub_chat2(bot: Client, update: Message):
 
 @Client.on_message(filters.command("fsub_mode1") & filters.user(ADMINS))
 async def get_fsub_mode1(bot: Client, update: Message):
-    mode = db.get_fsub_mode1()
+    mode = await db.get_fsub_mode1()
     if mode == "req":
         temp.REQ_FSUB_MODE1 = False
     else:
         temp.REQ_FSUB_MODE1 = True
+    await message.reply("Done ✅")
         
 @Client.on_message(filters.command("fsub_mode2") & filters.user(ADMINS))
 async def get_fsub_mode2(bot: Client, update: Message):
-    mode = db.get_fsub_mode2()
+    mode = await db.get_fsub_mode2()
     if mode == "req":
         temp.REQ_FSUB_MODE2 = False
     else:
         temp.REQ_FSUB_MODE2 = True
+    await message.reply("Done ✅")
 
 @Client.on_message(filters.command("deletefiles") & filters.user(ADMINS))
 async def deletemultiplefiles(bot, message):
