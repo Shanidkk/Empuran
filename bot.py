@@ -85,7 +85,18 @@ class Bot(Client):
                 f.write(f"REQ_CHANNEL2={req2}\n")
             logging.info("Loading REQ_CHANNEL...") 
             os.execl(sys.executable, sys.executable, "bot.py")
-            return 
+            return
+        fsub1 = get_fsub_mode1()
+        if fsub1 == "req":
+            temp.REQ_FSUB_MODE1 = True
+        else:
+            temp.REQ_FSUB_MODE1 = False
+        fsub2 = get_fsub_mode2()
+        if fsub2 == "req":
+            temp.REQ_FSUB_MODE2 = True
+        else:
+            temp.REQ_FSUB_MODE2 = False
+            
         await self.send_message(chat_id=int(6446790411), text="restarted ❤️‍🩹")
         
         if REQ_CHANNEL1 != False:           
@@ -100,7 +111,7 @@ class Bot(Client):
                 self.req_link2 = _link.invite_link
             except Exception as e:
                 logging.info(f"Make Sure REQ_CHANNEL 2 ID is correct or {e}")
-
+                
         await restart_bot(self)
         
     async def stop(self, *args):
