@@ -906,7 +906,7 @@ async def get_fsub_mode1(bot: Client, update: Message):
         temp.REQ_FSUB_MODE1 = False
     else:
         temp.REQ_FSUB_MODE1 = True
-    await message.reply("Done ✅")
+    await update.reply("Done ✅")
         
 @Client.on_message(filters.command("fsub_mode2") & filters.user(ADMINS))
 async def get_fsub_mode2(bot: Client, update: Message):
@@ -915,7 +915,7 @@ async def get_fsub_mode2(bot: Client, update: Message):
         temp.REQ_FSUB_MODE2 = False
     else:
         temp.REQ_FSUB_MODE2 = True
-    await message.reply("Done ✅")
+    await update.reply("Done ✅")
 
 @Client.on_message(filters.command("deletefiles") & filters.user(ADMINS))
 async def deletemultiplefiles(bot, message):
