@@ -86,12 +86,12 @@ class Bot(Client):
             logging.info("Loading REQ_CHANNEL...") 
             os.execl(sys.executable, sys.executable, "bot.py")
             return
-        fsub1 = db.get_fsub_mode1()
+        fsub1 = await db.get_fsub_mode1()
         if fsub1 == "req":
             temp.REQ_FSUB_MODE1 = True
         else:
             temp.REQ_FSUB_MODE1 = False
-        fsub2 = db.get_fsub_mode2()
+        fsub2 = await db.get_fsub_mode2()
         if fsub2 == "req":
             temp.REQ_FSUB_MODE2 = True
         else:
