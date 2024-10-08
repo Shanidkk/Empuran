@@ -40,6 +40,8 @@ class temp(object):
     U_NAME = None
     B_NAME = None
     SETTINGS = {}
+    REQ_FSUB_MODE2 = None
+    REQ_FSUB_MODE1 = None
 
 async def check_loop_sub(client, message):
     count = 0
