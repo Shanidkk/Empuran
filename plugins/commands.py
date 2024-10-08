@@ -899,6 +899,22 @@ async def get_fsub_chat2(bot: Client, update: Message):
     else:
         await update.reply_text(f"Fsub chat: <code>{chat['chat_id']}</code>", quote=True, parse_mode=enums.ParseMode.HTML)
 
+@Client.on_message(filters.command("fsub_mode1") & filters.user(ADMINS))
+async def get_fsub_mode1(bot: Client, update: Message):
+    mode = db.get_fsub_mode1()
+    if mode == "req"
+        temp.REQ_FSUB_MODE1 = False
+    else:
+        temp.REQ_FSUB_MODE1 = True
+        
+@Client.on_message(filters.command("fsub_mode2") & filters.user(ADMINS))
+async def get_fsub_mode2(bot: Client, update: Message):
+    mode = db.get_fsub_mode2()
+    if mode == "req"
+        temp.REQ_FSUB_MODE2 = False
+    else:
+        temp.REQ_FSUB_MODE2 = True
+
 @Client.on_message(filters.command("deletefiles") & filters.user(ADMINS))
 async def deletemultiplefiles(bot, message):
     chat_type = message.chat.type
