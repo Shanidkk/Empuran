@@ -905,9 +905,11 @@ async def get_fsub_mode1(bot, update: Message):
     if fsub1:
         fsub1 = fsub1['mode']
         if fsub1 == "req":
-            temp.REQ_FSUB_MODE1 = True
-        else:
             temp.REQ_FSUB_MODE1 = False
+            await db.add_fsub_mode1("normal")
+        else:
+            temp.REQ_FSUB_MODE1 = True
+            await db.add_fsub_mode1("req")
     else:
         temp.REQ_FSUB_MODE1 = False
     try:
@@ -923,9 +925,11 @@ async def get_fsub_mode2(bot: Client, update: Message):
     if fsub2:
         fsub2 = fsub2['mode']
         if fsub2 == "req":
-            temp.REQ_FSUB_MODE2 = True
-        else:
             temp.REQ_FSUB_MODE2 = False
+            await db.add_fsub_mode2("normal")
+        else:
+            temp.REQ_FSUB_MODE2 = True
+            await db.add_fsub_mode2("req")
     else:
         temp.REQ_FSUB_MODE2 = False
     try:
