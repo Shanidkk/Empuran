@@ -297,6 +297,24 @@ async def total_requests(bot, message):
     rju = await message.reply('Fetching stats..')
     total_one = await db.get_all_one_count()
     total_two = await db.get_all_two_count()
+    fsub1 = await db.get_fsub_mode1()
+    if fsub1:
+        fsub1 = fsub1['mode']
+        if fsub1 == "req":
+            mode1 = "request"
+        else:
+            mode1 = "normal"
+    else:
+        mode1 = "normal"
+    fsub2 = await db.get_fsub_mode2()
+    if fsub2:
+        fsub2 = fsub2['mode']
+        if fsub2 == "req":
+            mode2 = "request"
+        else:
+            mode2 = "normal"
+    else:
+        mode2 = "normal"
     if REQ_CHANNEL1 != False: 
         req_channel1 = await bot.get_chat(REQ_CHANNEL1)
         req_channel1 = req_channel1.title
@@ -307,4 +325,4 @@ async def total_requests(bot, message):
         req_channel2 = req_channel2.title
     else:
         req_channel2 = "REQ_CHANNEL2"
-    await rju.edit(f"{req_channel1} : {total_one}\n{req_channel2} : {total_two}")
+    await rju.edit(f"{req_channel1} : {total_one}\n{req_channel2} : {total_two}\n\nMode1 : {mode1}\nMode2 : {mode2}")
