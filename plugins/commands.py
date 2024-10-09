@@ -933,7 +933,7 @@ async def get_fsub_mode2(bot: Client, update: Message):
             await db.add_fsub_mode2("req")
     else:
         temp.REQ_FSUB_MODE2 = False
-        await db.add_fsub_mode1("normal")
+        await db.add_fsub_mode2("normal")
     try:
         _link = await bot.create_chat_invite_link(chat_id=int(REQ_CHANNEL2), creates_join_request=temp.REQ_FSUB_MODE2)
         bot.req_link2 = _link.invite_link
