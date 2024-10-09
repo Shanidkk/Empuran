@@ -823,27 +823,23 @@ async def add_fsub_chats(bot: Client, update: Message):
     await db.add_fsub_chat(chat)
 
     text = f"Added chat <code>{chat}</code> to the database."
+    
+    try:
+        link = (await bot.create_chat_invite_link(chat_id=int(chat), creates_join_request=temp.REQ_FSUB_MODE1)).invite_link
+    except Exception as e:
+        print(e)
+        link = "None"
+    bot.req_link1 = link
+    temp.REQ_CHANNEL1 = chat
     await update.reply_text(text=text, quote=True, parse_mode=enums.ParseMode.HTML)
-    with open("./dynamic.env", "wt+") as f:
-        f.write(f"REQ_CHANNEL1={chat}\n")
-    restarti.update_one(
-        {"_id": "frestart"},
-        {"$set": {"restart": "on"}},
-        upsert=True
-    )
-    os.execl(sys.executable, sys.executable, "bot.py")
-
 
 @Client.on_message(filters.command("delchat1") & filters.user(ADMINS))
 async def clear_fsub_chats(bot: Client, update: Message):
     await update.react("👍")
     await db.delete_fsub_chat(chat_id=(await db.get_fsub_chat())['chat_id'])
     await update.reply_text(text="Deleted fsub chat from the database.", quote=True)
-    with open("./dynamic.env", "wt+") as f:
-        f.write(f"REQ_CHANNEL1=False\n")
-
-    logger.info("Restarting to update REQ_CHANNEL from database...")
-    os.execl(sys.executable, sys.executable, "bot.py")
+    temp.REQ_CHANNEL1 = None
+    bot.req_link1 = None
     
 @Client.on_message(filters.command("viewchat1") & filters.user(ADMINS))
 async def get_fsub_chat(bot: Client, update: Message):
@@ -867,27 +863,24 @@ async def add_fsub_chats2(bot: Client, update: Message):
     await db.add_fsub_chat2(chat)
 
     text = f"Added chat <code>{chat}</code> to the database."
+    try:
+        link = (await bot.create_chat_invite_link(chat_id=int(chat), creates_join_request=temp.REQ_FSUB_MODE2)).invite_link
+    except Exception as e:
+        print(e)
+        link = "None"
+    bot.req_link2 = link
+    temp.REQ_CHANNEL2 = chat
     await update.reply_text(text=text, quote=True, parse_mode=enums.ParseMode.HTML)
-    with open("./dynamic.env", "wt+") as f:
-        f.write(f"REQ_CHANNEL2={chat}\n")
-    restarti.update_one(
-        {"_id": "frestart"},
-        {"$set": {"restart": "on"}},
-        upsert=True
-    )
-    os.execl(sys.executable, sys.executable, "bot.py")
+
 
 
 @Client.on_message(filters.command("delchat2") & filters.user(ADMINS))
-async def clear_fsub_chats2(bot: Client, update: Message):
+async def clear_fsub_chats2(bot, update: Message):
     await update.react("👍")
     await db.delete_fsub_chat2(chat_id=(await db.get_fsub_chat2())['chat_id'])
     await update.reply_text(text="Deleted fsub chat from the database.", quote=True)
-    with open("./dynamic.env", "wt+") as f:
-        f.write(f"REQ_CHANNEL2=False\n")
-
-    logger.info("Restarting to update REQ_CHANNEL from database...")
-    os.execl(sys.executable, sys.executable, "bot.py")
+    temp.REQ_CHANNEL2 = None
+    bot.req_link2 = None
     
 @Client.on_message(filters.command("viewchat2") & filters.user(ADMINS))
 async def get_fsub_chat2(bot: Client, update: Message):
