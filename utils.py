@@ -1,6 +1,6 @@
 import logging
 from pyrogram.errors import InputUserDeactivated, UserNotParticipant, FloodWait, UserIsBlocked, PeerIdInvalid
-from info import REQ_CHANNEL1, REQ_CHANNEL2, LONG_IMDB_DESCRIPTION, MAX_LIST_ELM, ADMINS
+from info import LONG_IMDB_DESCRIPTION, MAX_LIST_ELM, ADMINS
 from imdb import Cinemagoer
 import asyncio
 from pyrogram.types import Message, InlineKeyboardButton
@@ -42,6 +42,8 @@ class temp(object):
     SETTINGS = {}
     REQ_FSUB_MODE2 = None
     REQ_FSUB_MODE1 = None
+    REQ_CHANNEL1 = None
+    REQ_CHANNEL2 = None
 
 async def check_loop_sub(client, message):
     count = 0
@@ -79,7 +81,7 @@ async def is_requested_one(self , message):
     if message.from_user.id in ADMINS:
         return True
     try:
-        user = await self.get_chat_member(int(REQ_CHANNEL1), message.from_user.id)
+        user = await self.get_chat_member(int(temp.REQ_CHANNEL1), message.from_user.id)
     except UserNotParticipant:
         pass
     except Exception as e:
@@ -99,7 +101,7 @@ async def is_requested_two(self, message):
     if message.from_user.id in ADMINS:
         return True
     try:
-        user = await self.get_chat_member(int(REQ_CHANNEL2), message.from_user.id)
+        user = await self.get_chat_member(int(temp.REQ_CHANNEL2), message.from_user.id)
     except UserNotParticipant:
         pass
     except Exception as e:
