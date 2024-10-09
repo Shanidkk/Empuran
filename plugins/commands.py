@@ -901,11 +901,15 @@ async def get_fsub_chat2(bot: Client, update: Message):
 
 @Client.on_message(filters.command("fsub_mode1") & filters.user(ADMINS))
 async def get_fsub_mode1(bot, update: Message):
-    mode = await db.get_fsub_mode1()
-    if mode == "req":
-        temp.REQ_FSUB_MODE1 = False
+    fsub1 = await db.get_fsub_mode1()
+    if fsub1:
+        fsub1 = fsub1['mode']
+        if fsub1 == "req":
+            temp.REQ_FSUB_MODE1 = True
+        else:
+            temp.REQ_FSUB_MODE1 = False
     else:
-        temp.REQ_FSUB_MODE1 = True
+        temp.REQ_FSUB_MODE1 = False
     try:
         _link = await self.create_chat_invite_link(chat_id=int(REQ_CHANNEL1), creates_join_request=temp.REQ_FSUB_MODE1)
         bot.req_link1 = _link.invite_link
@@ -915,11 +919,15 @@ async def get_fsub_mode1(bot, update: Message):
         
 @Client.on_message(filters.command("fsub_mode2") & filters.user(ADMINS))
 async def get_fsub_mode2(bot: Client, update: Message):
-    mode = await db.get_fsub_mode2()
-    if mode == "req":
-        temp.REQ_FSUB_MODE2 = False
+    fsub2 = await db.get_fsub_mode2()
+    if fsub2:
+        fsub2 = fsub2['mode']
+        if fsub2 == "req":
+            temp.REQ_FSUB_MODE2 = True
+        else:
+            temp.REQ_FSUB_MODE2 = False
     else:
-        temp.REQ_FSUB_MODE2 = True
+        temp.REQ_FSUB_MODE2 = False
     try:
         _link = await self.create_chat_invite_link(chat_id=int(REQ_CHANNEL2), creates_join_request=temp.REQ_FSUB_MODE2)
         bot.req_link2 = _link.invite_link
