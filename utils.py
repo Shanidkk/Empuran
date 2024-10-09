@@ -45,7 +45,7 @@ class temp(object):
     REQ_CHANNEL1 = None
     REQ_CHANNEL2 = None
 
-async def load_datas(id):
+async def load_datas():
     k = await db.get_loadout()
     temp.REQ_CHANNEL1 = k['channel1']
     temp.REQ_CHANNEL2 = k['channel2']
