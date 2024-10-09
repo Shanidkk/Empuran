@@ -190,10 +190,14 @@ class Database:
 
     async def get_loadout(self):
         chat1 = await self.chat_col.find_one({})
-        if not chat1:
+        if chat1:
+            chat1 = chat1['chat_id']
+        else:
             chat1 = None
         chat2 = await self.chat_col2.find_one({})
-        if not chat2:
+        if chat2:
+            chat2 = chat2['chat_id']
+        else:
             chat2 = None
         data = { 
                'channel1' : chat1,
