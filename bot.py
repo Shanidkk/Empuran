@@ -11,8 +11,8 @@ from pyrogram import Client, __version__
 from pyrogram.raw.all import layer
 from database.ia_filterdb import Media
 from database.users_chats_db import db
-from info import SESSION, API_ID, API_HASH, BOT_TOKEN, LOG_STR, REQ_CHANNEL1, REQ_CHANNEL2, LOG_CHANNEL
-from utils import temp
+from info import SESSION, API_ID, API_HASH, BOT_TOKEN, LOG_STR, LOG_CHANNEL
+from utils import temp, load_datas
 from typing import Union, Optional, AsyncGenerator
 from pyrogram import types
 from plugins.commands import restarti
@@ -57,35 +57,28 @@ class Bot(Client):
         await super().start()
         await Media.ensure_indexes()
         me = await self.get_me()
+        await load_datas(me.id)
         temp.ME = me.id
         temp.U_NAME = me.username
         temp.B_NAME = me.first_name
         self.username = '@' + me.username
         logging.info(f"{me.first_name} with for Pyrogram v{__version__} (Layer {layer}) started on {me.username}.")
-        logging.info(LOG_STR)
-        if REQ_CHANNEL1 == None:
-            with open("./dynamic.env", "wt+") as f:
-                req = await db.get_fsub_chat()                
-                if req is None:
-                    req = False
-                else:
-                    req = req['chat_id']                   
-                f.write(f"REQ_CHANNEL1={req}\n")
-                
-            logging.info("Loading REQ_CHANNEL from database...") 
-            os.execl(sys.executable, sys.executable, "bot.py")
-            return 
-        if REQ_CHANNEL2 == None:
-            with open("./dynamic.env", "wt+") as f:
-                req2 = await db.get_fsub_chat2()
-                if req2 is None:
-                    req2 = False
-                else:
-                    req2 = req2['chat_id']
-                f.write(f"REQ_CHANNEL2={req2}\n")
-            logging.info("Loading REQ_CHANNEL...") 
-            os.execl(sys.executable, sys.executable, "bot.py")
-            return
+        logging.info(LOG_STR)        
+        if temp.REQ_CHANNEL1:  
+            try:
+                _link = await self.create_chat_invite_link(chat_id=int(temp.REQ_CHANNEL1), creates_join_request=True)
+                self.req_link1 = _link.invite_link
+                print(f"Invite Link One set as {self.req_link1}")
+            except Exception as e:
+                logging.info(f"Make Sure REQ_CHANNEL 1 ID is correct or {e}")
+        if temp.REQ_CHANNEL2:
+            try:
+                _link = await self.create_chat_invite_link(chat_id=int(temp.REQ_CHANNEL2), creates_join_request=True)
+                self.req_link2 = _link.invite_link
+                print(f"Invite Link Two set as {self.req_link2}")
+            except Exception as e:
+                logging.info(f"Make Sure REQ_CHANNEL 2 ID is correct or {e}")
+
         fsub1 = await db.get_fsub_mode1()
         if fsub1:
             fsub1 = fsub1['mode']
@@ -105,21 +98,8 @@ class Bot(Client):
         else:
             temp.REQ_FSUB_MODE2 = False
             
-        await self.send_message(chat_id=int(6446790411), text="restarted ❤️‍🩹")
+        await self.send_message(chat_id=int(6446790411), text="restarted ❤️‍🩹")        
         
-        if REQ_CHANNEL1 != False:           
-            try:
-                _link = await self.create_chat_invite_link(chat_id=int(REQ_CHANNEL1), creates_join_request=temp.REQ_FSUB_MODE1)
-                self.req_link1 = _link.invite_link
-            except Exception as e:
-                logging.info(f"Make Sure REQ_CHANNEL 1 ID is correct or {e}")
-        if REQ_CHANNEL2 != False:
-            try:
-                _link = await self.create_chat_invite_link(chat_id=int(REQ_CHANNEL2), creates_join_request=temp.REQ_FSUB_MODE2)
-                self.req_link2 = _link.invite_link
-            except Exception as e:
-                logging.info(f"Make Sure REQ_CHANNEL 2 ID is correct or {e}")
-                
         await restart_bot(self)
         
     async def stop(self, *args):
