@@ -315,12 +315,12 @@ async def total_requests(bot, message):
             mode2 = "normal"
     else:
         mode2 = "normal"
-    if REQ_CHANNEL1 != False: 
+    if temp.REQ_CHANNEL1 != False: 
         req_channel1 = await bot.get_chat(int(temp.REQ_CHANNEL1))
         req_channel1 = req_channel1.title
     else:
         req_channel1 = "REQ_CHANNEL1"
-    if REQ_CHANNEL2 != False:
+    if temp.REQ_CHANNEL2 != False:
         req_channel2 = await bot.get_chat(int(temp.REQ_CHANNEL2))
         req_channel2 = req_channel2.title
     else:
