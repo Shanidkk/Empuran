@@ -87,13 +87,21 @@ class Bot(Client):
             os.execl(sys.executable, sys.executable, "bot.py")
             return
         fsub1 = await db.get_fsub_mode1()
-        if fsub1 == "req":
-            temp.REQ_FSUB_MODE1 = True
+        if fsub1:
+            fsub1 = fsub1['mode']
+            if fsub1 == "req":
+                temp.REQ_FSUB_MODE1 = True
+            else:
+                temp.REQ_FSUB_MODE1 = False
         else:
             temp.REQ_FSUB_MODE1 = False
         fsub2 = await db.get_fsub_mode2()
-        if fsub2 == "req":
-            temp.REQ_FSUB_MODE2 = True
+        if fsub2:
+            fsub2 = fsub2['mode']
+            if fsub2 == "req":
+                temp.REQ_FSUB_MODE2 = True
+            else:
+                temp.REQ_FSUB_MODE2 = False
         else:
             temp.REQ_FSUB_MODE2 = False
             
