@@ -900,12 +900,17 @@ async def get_fsub_chat2(bot: Client, update: Message):
         await update.reply_text(f"Fsub chat: <code>{chat['chat_id']}</code>", quote=True, parse_mode=enums.ParseMode.HTML)
 
 @Client.on_message(filters.command("fsub_mode1") & filters.user(ADMINS))
-async def get_fsub_mode1(bot: Client, update: Message):
+async def get_fsub_mode1(bot, update: Message):
     mode = await db.get_fsub_mode1()
     if mode == "req":
         temp.REQ_FSUB_MODE1 = False
     else:
         temp.REQ_FSUB_MODE1 = True
+    try:
+        _link = await self.create_chat_invite_link(chat_id=int(REQ_CHANNEL1), creates_join_request=temp.REQ_FSUB_MODE1)
+        bot.req_link1 = _link.invite_link
+    except Exception as e:
+        logging.info(f"Make Sure REQ_CHANNEL 1 ID is correct or {e}")
     await update.reply("Done ✅")
         
 @Client.on_message(filters.command("fsub_mode2") & filters.user(ADMINS))
@@ -915,6 +920,11 @@ async def get_fsub_mode2(bot: Client, update: Message):
         temp.REQ_FSUB_MODE2 = False
     else:
         temp.REQ_FSUB_MODE2 = True
+    try:
+        _link = await self.create_chat_invite_link(chat_id=int(REQ_CHANNEL2), creates_join_request=temp.REQ_FSUB_MODE2)
+        bot.req_link2 = _link.invite_link
+    except Exception as e:
+        logging.info(f"Make Sure REQ_CHANNEL 2 ID is correct or {e}")
     await update.reply("Done ✅")
 
 @Client.on_message(filters.command("deletefiles") & filters.user(ADMINS))
