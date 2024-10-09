@@ -188,6 +188,19 @@ class Database:
             count += 1
         return count
 
+    async def get_loadout(self):
+        chat1 = await self.chat_col.find_one({})
+        if not chat1:
+            chat1 = None
+        chat2 = await self.chat_col2.find_one({})
+        if not chat2:
+            chat2 = None
+        data = { 
+               'channel1' : chat1,
+               'channel2' : chat2
+        }
+        return data
+        
     async def add_fsub_chat(self, chat_id):
         try:
             await self.chat_col.delete_many({})
