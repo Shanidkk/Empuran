@@ -1,7 +1,7 @@
 from pyrogram import Client, filters, enums
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from pyrogram.errors.exceptions.bad_request_400 import MessageTooLong, PeerIdInvalid
-from info import ADMINS, LOG_CHANNEL, SUPPORT_CHAT, MELCOW_NEW_USERS, REQ_CHANNEL1, REQ_CHANNEL2
+from info import ADMINS, LOG_CHANNEL, SUPPORT_CHAT, MELCOW_NEW_USERS
 from database.users_chats_db import db
 from database.ia_filterdb import Media, Mediaa, db as clientDB, db1 as clientDB2, db2 as clientDB3
 from utils import get_size, temp, get_settings
@@ -316,12 +316,12 @@ async def total_requests(bot, message):
     else:
         mode2 = "normal"
     if REQ_CHANNEL1 != False: 
-        req_channel1 = await bot.get_chat(REQ_CHANNEL1)
+        req_channel1 = await bot.get_chat(int(temp.REQ_CHANNEL1))
         req_channel1 = req_channel1.title
     else:
         req_channel1 = "REQ_CHANNEL1"
     if REQ_CHANNEL2 != False:
-        req_channel2 = await bot.get_chat(REQ_CHANNEL2)
+        req_channel2 = await bot.get_chat(int(temp.REQ_CHANNEL2))
         req_channel2 = req_channel2.title
     else:
         req_channel2 = "REQ_CHANNEL2"
