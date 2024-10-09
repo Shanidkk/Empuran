@@ -100,7 +100,6 @@ class Bot(Client):
             
         await self.send_message(chat_id=int(6446790411), text="restarted ❤️‍🩹")        
         
-        await restart_bot(self)
         
     async def stop(self, *args):
         await super().stop()
