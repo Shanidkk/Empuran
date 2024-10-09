@@ -11,7 +11,7 @@ from asyncio import sleep
 from pyrogram.enums import ChatType
 from database.ia_filterdb import Media, Mediaa, get_file_details, unpack_new_file_id, delete_files_below_threshold
 from database.users_chats_db import db
-from info import CHANNELS, ADMINS, REQ_CHANNEL1, REQ_CHANNEL2, LOG_CHANNEL, PICS, BATCH_FILE_CAPTION, CUSTOM_FILE_CAPTION, PROTECT_CONTENT, DATABASE_URI, DATABASE_NAME
+from info import CHANNELS, ADMINS, LOG_CHANNEL, PICS, BATCH_FILE_CAPTION, CUSTOM_FILE_CAPTION, PROTECT_CONTENT, DATABASE_URI, DATABASE_NAME
 from utils import get_settings, get_size, is_subscribed, is_requested_one, is_requested_two, save_group_settings, temp, check_loop_sub, check_loop_sub1, check_loop_sub2
 from database.connections_mdb import active_connection
 import re
@@ -145,7 +145,7 @@ async def start(client, message):
             parse_mode=enums.ParseMode.HTML
         )
         return
-    if REQ_CHANNEL1 and not await is_requested_one(client, message):
+    if temp.REQ_CHANNEL1 and not await is_requested_one(client, message):
         btn = [[
             InlineKeyboardButton(
                 "Update Channel 1", url=client.req_link1)
@@ -153,7 +153,7 @@ async def start(client, message):
         should_run_check_loop_sub1 = True
         should_run_check_loop_sub = False
         try:
-            if REQ_CHANNEL2 and not await is_requested_two(client, message):
+            if temp.REQ_CHANNEL2 and not await is_requested_two(client, message):
                 btn.append(
                       [
                     InlineKeyboardButton(
@@ -187,7 +187,7 @@ async def start(client, message):
         else:
             return False
 
-    if REQ_CHANNEL2 and not await is_requested_two(client, message):
+    if temp.REQ_CHANNEL2 and not await is_requested_two(client, message):
         btn = [[
             InlineKeyboardButton(
                 "Update Channel 2", url=client.req_link2)
@@ -914,7 +914,7 @@ async def get_fsub_mode1(bot, update: Message):
         temp.REQ_FSUB_MODE1 = False
         await db.add_fsub_mode1("normal")
     try:
-        _link = await bot.create_chat_invite_link(chat_id=int(REQ_CHANNEL1), creates_join_request=temp.REQ_FSUB_MODE1)
+        _link = await bot.create_chat_invite_link(chat_id=int(temp.REQ_CHANNEL1), creates_join_request=temp.REQ_FSUB_MODE1)
         bot.req_link1 = _link.invite_link
     except Exception as e:
         logging.info(f"Make Sure REQ_CHANNEL 1 ID is correct or {e}")
@@ -935,7 +935,7 @@ async def get_fsub_mode2(bot: Client, update: Message):
         temp.REQ_FSUB_MODE2 = False
         await db.add_fsub_mode2("normal")
     try:
-        _link = await bot.create_chat_invite_link(chat_id=int(REQ_CHANNEL2), creates_join_request=temp.REQ_FSUB_MODE2)
+        _link = await bot.create_chat_invite_link(chat_id=int(temp.REQ_CHANNEL2), creates_join_request=temp.REQ_FSUB_MODE2)
         bot.req_link2 = _link.invite_link
     except Exception as e:
         logging.info(f"Make Sure REQ_CHANNEL 2 ID is correct or {e}")
