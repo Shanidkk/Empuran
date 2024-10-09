@@ -911,7 +911,7 @@ async def get_fsub_mode1(bot, update: Message):
     else:
         temp.REQ_FSUB_MODE1 = False
     try:
-        _link = await self.create_chat_invite_link(chat_id=int(REQ_CHANNEL1), creates_join_request=temp.REQ_FSUB_MODE1)
+        _link = await bot.create_chat_invite_link(chat_id=int(REQ_CHANNEL1), creates_join_request=temp.REQ_FSUB_MODE1)
         bot.req_link1 = _link.invite_link
     except Exception as e:
         logging.info(f"Make Sure REQ_CHANNEL 1 ID is correct or {e}")
@@ -929,7 +929,7 @@ async def get_fsub_mode2(bot: Client, update: Message):
     else:
         temp.REQ_FSUB_MODE2 = False
     try:
-        _link = await self.create_chat_invite_link(chat_id=int(REQ_CHANNEL2), creates_join_request=temp.REQ_FSUB_MODE2)
+        _link = await bot.create_chat_invite_link(chat_id=int(REQ_CHANNEL2), creates_join_request=temp.REQ_FSUB_MODE2)
         bot.req_link2 = _link.invite_link
     except Exception as e:
         logging.info(f"Make Sure REQ_CHANNEL 2 ID is correct or {e}")
