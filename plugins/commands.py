@@ -135,8 +135,8 @@ async def start(client, message):
         ]]
         reply_markup = InlineKeyboardMarkup(buttons)
         
-        sticker_link = ['CAACAgUAAxkBAAJ1JWblk-US6Uoj9pRCCUPmsO4ZGrhxAAJiDgACLnkIVRYwN-sph-KJNgQ',
-        'CAACAgUAAxkBAAJ1KGbllXrrULM9g43W4WZWzfUORLfwAAJlDQACyQQJVU45CAwlz3BxNgQ']
+        sticker_link = ['CAACAgUAAxkBAAJ9JmbxdZ1YtAv8TLl6yh9Qm1W5vujIAALnEAACwP6JV0Jbr6av6z5TNgQ',
+        'CAACAgUAAxkBAAJ9KWbxddKI3IDsNDmLdOS_3i7ACz2_AAIeDwACFNqQV2WRPQio6MlQNgQ']
         
 
         m = await message.reply_sticker(random.choice(sticker_link))         
