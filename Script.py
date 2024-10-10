@@ -29,6 +29,14 @@ class script(object):
 
 /setchat2 - 2nd Force Sub Channel ID
 
+/fsub_mode1 - change mode 1 (normal<>request)
+
+/fsub_mode2 - change mode 2 (normal<>request)
+
+/dechat1 - OFF 1
+
+/delchat2 - OFF 2
+
 /totalreq - Total Req in 2 Fsub Channels
 
 /purge_one - Delete Requests (1st fsub)
