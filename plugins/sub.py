@@ -4,7 +4,7 @@ from info import ADMINS
 from database.users_chats_db import db
 from utils import temp
 
-@Client.on_chat_join_request(filters.chat(temp.REQ_CHANNEL1) | filters.chat(temp.REQ_CHANNEL2))
+@Client.on_chat_join_request()
 async def join_reqs(b, join_req: ChatJoinRequest):
     user_id = join_req.from_user.id
     try:
