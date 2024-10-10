@@ -6,6 +6,7 @@ from utils import temp
 
 @Client.on_chat_join_request()
 async def join_reqs(b, join_req: ChatJoinRequest):
+    print("join req found")
     user_id = join_req.from_user.id
     try:
         if join_req.chat.id == temp.REQ_CHANNEL1:
