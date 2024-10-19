@@ -198,3 +198,42 @@ async def add_channel_2(client: Client, query):
     chat_title = forwarded_message.forward_from_chat.title
     await pending_collection_2.insert_one({"chat_id": chat_id, "name": chat_title})
     await forwarded_message.reply(f"Second FSub Channel '{chat_title}' has been added.")
+# Handle showing channel details and removing the channel for first FSub
+@Client.on_callback_query(filters.regex(r"^show_channel_(\d+)$"))
+async def show_channel_details(client: Client, query):
+    chat_id = int(query.data.split("_")[2])
+    channel = await pending_collection_1.find_one({"chat_id": chat_id})
+
+    if channel:
+        buttons = [[InlineKeyboardButton("❌ Remove Channel", callback_data=f"remove_channel_{chat_id}_1")]]
+        await query.message.reply(f"Channel Name: {channel['name']}\nChannel ID: {chat_id}",
+                                  reply_markup=InlineKeyboardMarkup(buttons))
+    else:
+        await query.message.reply("Channel not found.")
+
+# Handle removing a channel for first FSub
+@Client.on_callback_query(filters.regex(r"^remove_channel_(\d+)_1$"))
+async def remove_channel_1(client: Client, query):
+    chat_id = int(query.data.split("_")[2])
+    await pending_collection_1.delete_one({"chat_id": chat_id})
+    await query.message.reply(f"Channel {chat_id} has been removed from the pending list.")
+
+# Handle showing channel details and removing the channel for second FSub
+@Client.on_callback_query(filters.regex(r"^show_channel_(\d+)_2$"))
+async def show_channel_details_2(client: Client, query):
+    chat_id = int(query.data.split("_")[2])
+    channel = await pending_collection_2.find_one({"chat_id": chat_id})
+
+    if channel:
+        buttons = [[InlineKeyboardButton("❌ Remove Channel", callback_data=f"remove_channel_{chat_id}_2")]]
+        await query.message.reply(f"Channel Name: {channel['name']}\nChannel ID: {chat_id}",
+                                  reply_markup=InlineKeyboardMarkup(buttons))
+    else:
+        await query.message.reply("Channel not found.")
+
+# Handle removing a channel for second FSub
+@Client.on_callback_query(filters.regex(r"^remove_channel_(\d+)_2$"))
+async def remove_channel_2(client: Client, query):
+    chat_id = int(query.data.split("_")[2])
+    await pending_collection_2.delete_one({"chat_id": chat_id})
+    await query.message.reply(f"Channel {chat_id} has been removed from the pending list.")
