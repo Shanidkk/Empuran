@@ -68,6 +68,7 @@ async def join_reqs(b, join_req: ChatJoinRequest):
     if chat_id == temp.REQ_CHANNEL1:
         mode = 1
         if join_req.invite_link.creator.id == b.me.id:
+            await db.add_req_one(user_id)
             await add_request(chat_id, user_id, request_collection_1)
         total_requests = await get_total_requests(chat_id, request_collection_1)
     
@@ -75,9 +76,9 @@ async def join_reqs(b, join_req: ChatJoinRequest):
     elif chat_id == temp.REQ_CHANNEL2:
         mode = 2
         if join_req.invite_link.creator.id == b.me.id:
+            await db.add_req_two(user_id)
             await add_request(chat_id, user_id, request_collection_2)
         total_requests = await get_total_requests(chat_id, request_collection_2)
-
     # Check for switching when 10k requests are reached
     if total_requests >= 10000:
         if mode == 1:
