@@ -1,168 +1,142 @@
 from pyrogram import Client, filters
-from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery, ChatJoinRequest
+from pyrogram.types import ChatJoinRequest, InlineKeyboardMarkup, InlineKeyboardButton
 from motor.motor_asyncio import AsyncIOMotorClient
-import pyromod.listen  # Import pyromod's listen to handle incoming messages
+import pyromod.listen
 from utils import temp
 
 # MongoDB setup
 MONGO_URI = "your_mongo_db_uri_here"
 mongo_client = AsyncIOMotorClient(MONGO_URI)
 db = mongo_client["join_request_db"]
-channel_collection = db["channels"]
-pending_collection = db["pending_channels"]
-request_collection = db["requests"]
 
-# Add new channel to the pending list
-async def add_channel_to_pending(chat_id: int, chat_name: str):
-    await channel_collection.insert_one({"chat_id": chat_id, "name": chat_name})
-    print(f"Channel {chat_name} added to pending list")
+# Collections for requests and pending channels
+request_collection_1 = db["requests_channel_1"]
+request_collection_2 = db["requests_channel_2"]
+pending_collection_1 = db["pending_channels_1"]
+pending_collection_2 = db["pending_channels_2"]
 
-# Remove a channel from the pending list
-async def remove_channel_from_pending(chat_id: int):
-    await channel_collection.delete_one({"chat_id": chat_id})
-    print(f"Channel with ID {chat_id} removed from pending list")
-
-# Fetch the pending channels
-async def get_pending_channels():
-    return await channel_collection.find({}).to_list(length=None)
-
-# Add and count requests for each channel
-async def add_request(chat_id: int, user_id: int):
-    existing_request = await request_collection.find_one({"chat_id": chat_id, "user_id": user_id})
-    
+# Function to add and count requests for a channel
+async def add_request(chat_id: int, user_id: int, collection):
+    existing_request = await collection.find_one({"chat_id": chat_id, "user_id": user_id})
     if not existing_request:
-        # Add new request and increment count
-        await request_collection.insert_one({"chat_id": chat_id, "user_id": user_id})
-        await request_collection.update_one(
+        await collection.insert_one({"chat_id": chat_id, "user_id": user_id})
+        await collection.update_one(
             {"chat_id": chat_id},
             {"$inc": {"total_requests": 1}},
             upsert=True
         )
-        print(f"Request from user {user_id} added for chat {chat_id}")
 
 # Get total requests for a specific chat
-async def get_total_requests(chat_id: int):
-    chat_data = await request_collection.find_one({"chat_id": chat_id})
+async def get_total_requests(chat_id: int, collection):
+    chat_data = await collection.find_one({"chat_id": chat_id})
     return chat_data.get("total_requests", 0) if chat_data else 0
 
+# Fetch the next pending channel
+async def get_next_pending_channel(pending_collection):
+    next_channel = await pending_collection.find_one({}, sort=[('_id', 1)])
+    if next_channel:
+        return next_channel["chat_id"]
+    return None
+
+# Remove the channel from the pending list after switching
+async def remove_pending_channel(chat_id: int, pending_collection):
+    await pending_collection.delete_one({"chat_id": chat_id})
+
 # Handle switching when a channel reaches 10k subscribers
-async def switch_channel(chat_id, fsub_channel, fsub_mode):
-    await pending_collection.insert_one({"chat_id": chat_id, "fsub_channel": fsub_channel})
-    print(f"Switched to new channel {chat_id}")
+async def switch_channel(chat_id, fsub_mode, pending_collection, collection):
+    if fsub_mode == 0:
+        return 
+    next_channel = await get_next_pending_channel(pending_collection)
+    if next_channel:
+        await remove_pending_channel(next_channel, pending_collection)
+        if fsub_mode == 1:
+            temp.REQ_CHANNEL1 = next_channel
+        else:
+            temp.REQ_CHANNEL2 = next_channel
+        print(f"Switched to new channel {next_channel} for Force Sub mode {fsub_mode}")
+    else:
+        print(f"No more pending channels to switch to for mode {fsub_mode}")
 
-# Handle pending channels for first force subscription
-@Client.on_message(filters.command('pending') & filters.private)
-async def pending_channels(client, message):
-    channels = await get_pending_channels()  # Fetch pending channels from the DB
-    
-    if not channels:
-        text = "No pending channels."
-        await message.reply(text=text)
-        return
-
-    buttons = []
-    for ch in channels:
-        buttons.append([InlineKeyboardButton(f"{ch['name']}", callback_data=f"show_channel_{ch['chat_id']}")])
-    
-    # Add button for adding a new channel
-    buttons.append([InlineKeyboardButton("➕ Add New Channel", callback_data="add_channel")])
-    
-    reply_markup = InlineKeyboardMarkup(buttons)
-    await message.reply(text="Pending Channels:", reply_markup=reply_markup)
-
-# Handle pending channels for second force subscription
-@Client.on_message(filters.command('pending2') & filters.private)
-async def pending_channels_2(client, message):
-    channels = await get_pending_channels()  # Fetch pending channels for second FSub
-    
-    if not channels:
-        text = "No pending channels."
-        await message.reply(text=text)
-        return
-
-    buttons = []
-    for ch in channels:
-        buttons.append([InlineKeyboardButton(f"{ch['name']}", callback_data=f"show_channel_{ch['chat_id']}")])
-    
-    # Add button for adding a new channel
-    buttons.append([InlineKeyboardButton("➕ Add New Channel", callback_data="add_channel_2")])
-    
-    reply_markup = InlineKeyboardMarkup(buttons)
-    await message.reply(text="Pending Channels for Second FSub:", reply_markup=reply_markup)
-
-# Handle button click for showing channel remove option
-@Client.on_callback_query(filters.regex(r"^show_channel_(\d+)$"))
-async def show_channel_options(client: Client, query: CallbackQuery):
-    chat_id = int(query.data.split("_")[-1])
-    
-    # Show option to remove the channel
-    reply_markup = InlineKeyboardMarkup(
-        [
-            [InlineKeyboardButton("❌ Remove Channel", callback_data=f"remove_channel_{chat_id}")],
-            [InlineKeyboardButton("🔙 Back", callback_data="pending_channels")]
-        ]
-    )
-    
-    await query.message.edit_text(f"Channel ID: {chat_id}\nWhat would you like to do?", reply_markup=reply_markup)
-
-# Handle removing channel from the pending list
-@Client.on_callback_query(filters.regex(r"^remove_channel_(\d+)$"))
-async def remove_channel_handler(client: Client, query: CallbackQuery):
-    chat_id = int(query.data.split("_")[-1])
-    
-    await remove_channel_from_pending(chat_id)
-    await query.message.edit_text(f"Channel with ID {chat_id} has been removed.")
-    
-    # Optionally show the pending channels again
-    await pending_channels(client, query.message)
-
-# Handle "Add New Channel" button click
-@Client.on_callback_query(filters.regex(r"^add_channel$"))
-async def add_channel_button_handler(client: Client, query: CallbackQuery):
-    await query.message.reply("Please forward a message from the channel you want to add.")
-    
-    # Wait for the forwarded message
-    forwarded_message = await client.listen(query.message.chat.id, filters.forwarded)
-    
-    chat_id = forwarded_message.forward_from_chat.id
-    chat_title = forwarded_message.forward_from_chat.title
-    
-    await add_channel_to_pending(chat_id, chat_title)
-    await forwarded_message.reply(f"Channel '{chat_title}' has been added with ID: {chat_id}")
-
-# Handle "Add New Channel" for Second FSub button click
-@Client.on_callback_query(filters.regex(r"^add_channel_2$"))
-async def add_channel_2_button_handler(client: Client, query: CallbackQuery):
-    await query.message.reply("Please forward a message from the second FSub channel you want to add.")
-    
-    # Wait for the forwarded message
-    forwarded_message = await client.listen(query.message.chat.id, filters.forwarded)
-    
-    chat_id = forwarded_message.forward_from_chat.id
-    chat_title = forwarded_message.forward_from_chat.title
-    
-    await add_channel_to_pending(chat_id, chat_title)
-    await forwarded_message.reply(f"Second FSub Channel '{chat_title}' has been added with ID: {chat_id}")
-
-# Handle join requests and switch FSub channel when needed
+# Handle join requests for both force subscriptions
 @Client.on_chat_join_request()
 async def join_reqs(b, join_req: ChatJoinRequest):
     user_id = join_req.from_user.id
     chat_id = join_req.chat.id
     mode = 0
-    # Add request and count for channel 1
+
+    # Channel 1 Force Sub logic
     if chat_id == temp.REQ_CHANNEL1:
         mode = 1
         if join_req.invite_link.creator.id == b.me.id:
-            await db.add_req_one(user_id)
-            await add_request(chat_id, user_id)
+            await add_request(chat_id, user_id, request_collection_1)
+        total_requests = await get_total_requests(chat_id, request_collection_1)
     
-    # Add request and count for channel 2
-    if chat_id == temp.REQ_CHANNEL2:
+    # Channel 2 Force Sub logic
+    elif chat_id == temp.REQ_CHANNEL2:
         mode = 2
         if join_req.invite_link.creator.id == b.me.id:
-            await db.add_req_two(user_id)
-            await add_request(chat_id, user_id)
-    total_requests = await get_total_requests(chat_id)
+            await add_request(chat_id, user_id, request_collection_2)
+        total_requests = await get_total_requests(chat_id, request_collection_2)
+
+    # Check for switching when 10k requests are reached
     if total_requests >= 10000:
-        await switch_channel(chat_id, temp.REQ_CHANNEL2, fsub_mode=mode)
+        if mode == 1:
+            await switch_channel(chat_id, mode, pending_collection_1, request_collection_1)
+        elif mode == 2:
+            await switch_channel(chat_id, mode, pending_collection_2, request_collection_2)
+
+# Handle pending channels list for first force subscription
+@Client.on_message(filters.command('pending') & filters.private)
+async def pending_channels(client, message):
+    channels = await pending_collection_1.find({}).to_list(length=None)
+    
+    if not channels:
+        text = "No pending channels."
+        await message.reply(text=text)
+        return
+
+    buttons = [
+        [InlineKeyboardButton(f"{ch['name']}", callback_data=f"show_channel_{ch['chat_id']}")]
+        for ch in channels
+    ]
+    buttons.append([InlineKeyboardButton("➕ Add New Channel", callback_data="add_channel_1")])
+    await message.reply(text="Pending Channels:", reply_markup=InlineKeyboardMarkup(buttons))
+
+# Handle pending channels list for second force subscription
+@Client.on_message(filters.command('pending2') & filters.private)
+async def pending_channels_2(client, message):
+    channels = await pending_collection_2.find({}).to_list(length=None)
+    
+    if not channels:
+        text = "No pending channels."
+        await message.reply(text=text)
+        return
+
+    buttons = [
+        [InlineKeyboardButton(f"{ch['name']}", callback_data=f"show_channel_{ch['chat_id']}")]
+        for ch in channels
+    ]
+    buttons.append([InlineKeyboardButton("➕ Add New Channel", callback_data="add_channel_2")])
+    await message.reply(text="Pending Channels for Second FSub:", reply_markup=InlineKeyboardMarkup(buttons))
+
+# Handle adding a new channel for first FSub
+@Client.on_callback_query(filters.regex(r"^add_channel_1$"))
+async def add_channel_1(client: Client, query):
+    await query.message.reply("Forward a message from the channel you want to add.")
+    forwarded_message = await client.listen(query.message.chat.id, filters.forwarded)
+    
+    chat_id = forwarded_message.forward_from_chat.id
+    chat_title = forwarded_message.forward_from_chat.title
+    await pending_collection_1.insert_one({"chat_id": chat_id, "name": chat_title})
+    await forwarded_message.reply(f"Channel '{chat_title}' has been added.")
+
+# Handle adding a new channel for second FSub
+@Client.on_callback_query(filters.regex(r"^add_channel_2$"))
+async def add_channel_2(client: Client, query):
+    await query.message.reply("Forward a message from the channel you want to add for the second FSub.")
+    forwarded_message = await client.listen(query.message.chat.id, filters.forwarded)
+    
+    chat_id = forwarded_message.forward_from_chat.id
+    chat_title = forwarded_message.forward_from_chat.title
+    await pending_collection_2.insert_one({"chat_id": chat_id, "name": chat_title})
+    await forwarded_message.reply(f"Second FSub Channel '{chat_title}' has been added.")
