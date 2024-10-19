@@ -27,7 +27,8 @@ import logging
 from plugins.commands import incol
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.ERROR)
+# Disable logging completely
+logging.getLogger().setLevel(logging.CRITICAL)
 
 BUTTONS = {}
 SPELL_CHECK = {}
