@@ -1,7 +1,6 @@
 from pyrogram import Client, filters
 from pyrogram.types import ChatJoinRequest, InlineKeyboardMarkup, InlineKeyboardButton
 from motor.motor_asyncio import AsyncIOMotorClient
-import pyromod.listen
 from utils import temp
 from info import ADMINS, DATABASE_URI
 from database.users_chats_db import db
