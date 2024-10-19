@@ -42,17 +42,49 @@ async def get_next_pending_channel(pending_collection):
 async def remove_pending_channel(chat_id: int, pending_collection):
     await pending_collection.delete_one({"chat_id": chat_id})
 
+
+async def complete_switching1(chat):
+    await db.add_fsub_chat(chat)
+    text = f"Added chat <code>{chat}</code> to the database."
+    try:
+        link = (await bot.create_chat_invite_link(chat_id=int(chat), creates_join_request=temp.REQ_FSUB_MODE1)).invite_link
+    except Exception as e:
+        print(e)
+        link = "None"
+    bot.req_link1 = link
+    temp.REQ_CHANNEL1 = chat
+
+async def complete_switching1(chat, bot):
+    await db.add_fsub_chat(chat)
+    try:
+        link = (await bot.create_chat_invite_link(chat_id=int(chat), creates_join_request=temp.REQ_FSUB_MODE1)).invite_link
+    except Exception as e:
+        print(e)
+        link = "None"
+    bot.req_link1 = link
+    temp.REQ_CHANNEL1 = chat
+
+async def complete_switching2(chat, bot):
+    await db.add_fsub_chat2(chat)
+    try:
+        link = (await bot.create_chat_invite_link(chat_id=int(chat), creates_join_request=temp.REQ_FSUB_MODE2)).invite_link
+    except Exception as e:
+        print(e)
+        link = "None"
+    bot.req_link2 = link
+    temp.REQ_CHANNEL2 = chat
+
 # Handle switching when a channel reaches 10k subscribers
-async def switch_channel(chat_id, fsub_mode, pending_collection, collection):
+async def switch_channel(chat_id, fsub_mode, pending_collection, collection, bot):
     if fsub_mode == 0:
         return 
     next_channel = await get_next_pending_channel(pending_collection)
     if next_channel:
         await remove_pending_channel(next_channel, pending_collection)
         if fsub_mode == 1:
-            temp.REQ_CHANNEL1 = next_channel
+            await complete_switching1(chat, bot)
         else:
-            temp.REQ_CHANNEL2 = next_channel
+            await complete_switching2(chat, bot)
         print(f"Switched to new channel {next_channel} for Force Sub mode {fsub_mode}")
     else:
         print(f"No more pending channels to switch to for mode {fsub_mode}")
@@ -82,9 +114,9 @@ async def join_reqs(b, join_req: ChatJoinRequest):
     # Check for switching when 10k requests are reached
     if total_requests >= 10000:
         if mode == 1:
-            await switch_channel(chat_id, mode, pending_collection_1, request_collection_1)
+            await switch_channel(chat_id, mode, pending_collection_1, request_collection_1, b)
         elif mode == 2:
-            await switch_channel(chat_id, mode, pending_collection_2, request_collection_2)
+            await switch_channel(chat_id, mode, pending_collection_2, request_collection_2, b)
 
 # Handle pending channels list for first force subscription
 @Client.on_message(filters.command('pending') & filters.private)
