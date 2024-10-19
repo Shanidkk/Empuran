@@ -4,9 +4,10 @@ from motor.motor_asyncio import AsyncIOMotorClient
 import pyromod.listen
 from utils import temp
 from info import ADMINS, DATABASE_URI
+from database.users_chats_db import db
 
 # MongoDB setup
-MONGO_URI = "your_mongo_db_uri_here"
+
 mongo_client = AsyncIOMotorClient(DATABASE_URI)
 db = mongo_client["join_request_db"]
 
@@ -62,7 +63,8 @@ async def notify_admin_channel(bot, fsub_mode, next_channel, link):
     text = (f"Force Sub mode {fsub_mode} has switched channels.\n"
             f"New Channel ID: {next_channel}\n"
             f"Invite Link: {link}")
-    await bot.send_message(chat_id=ADMIN_CHAT_ID, text=text)
+    for id in ADMINS:
+        await bot.send_message(chat_id=id, text=text)
 
 async def complete_switching1(chat, bot):
     await db.add_fsub_chat(chat)
@@ -134,7 +136,7 @@ async def join_reqs(b, join_req: ChatJoinRequest):
             await switch_channel(chat_id, mode, pending_collection_2, request_collection_2, b)
 
 # Admin command to change the request limit
-@Client.on_message(filters.command('set_limit') & filters.user(ADMIN_CHAT_ID))
+@Client.on_message(filters.command('set_limit') & filters.user(ADMINS))
 async def set_request_limit_command(client, message):
     try:
         new_limit = int(message.text.split()[1])
@@ -143,10 +145,9 @@ async def set_request_limit_command(client, message):
     except Exception as e:
         await message.reply("Failed to update request limit. Make sure you provide a valid number.")
 
-@Client.on_message(filters.command('pending') & filters.private)
+@Client.on_message(filters.command('pending') & filters.private & filters.user(ADMINS))
 async def pending_channels(client, message):
     channels = await pending_collection_1.find({}).to_list(length=None)
-    
     if not channels:
         text = "No pending channels."
         await message.reply(text=text)
@@ -160,7 +161,7 @@ async def pending_channels(client, message):
     await message.reply(text="Pending Channels:", reply_markup=InlineKeyboardMarkup(buttons))
 
 # Handle pending channels list for second force subscription
-@Client.on_message(filters.command('pending2') & filters.private)
+@Client.on_message(filters.command('pending2') & filters.private & filters.user(ADMINS))
 async def pending_channels_2(client, message):
     channels = await pending_collection_2.find({}).to_list(length=None)
     
