@@ -43,7 +43,7 @@ async def remove_pending_channel(chat_id: int, pending_collection):
     await pending_collection.delete_one({"chat_id": chat_id})
 
 
-async def complete_switching1(chat):
+async def complete_switching1(chat, bot):
     await db.add_fsub_chat(chat)
     text = f"Added chat <code>{chat}</code> to the database."
     try:
@@ -54,15 +54,6 @@ async def complete_switching1(chat):
     bot.req_link1 = link
     temp.REQ_CHANNEL1 = chat
 
-async def complete_switching1(chat, bot):
-    await db.add_fsub_chat(chat)
-    try:
-        link = (await bot.create_chat_invite_link(chat_id=int(chat), creates_join_request=temp.REQ_FSUB_MODE1)).invite_link
-    except Exception as e:
-        print(e)
-        link = "None"
-    bot.req_link1 = link
-    temp.REQ_CHANNEL1 = chat
 
 async def complete_switching2(chat, bot):
     await db.add_fsub_chat2(chat)
@@ -95,8 +86,6 @@ async def join_reqs(b, join_req: ChatJoinRequest):
     user_id = join_req.from_user.id
     chat_id = join_req.chat.id
     mode = 0
-
-    # Channel 1 Force Sub logic
     if chat_id == temp.REQ_CHANNEL1:
         mode = 1
         if join_req.invite_link.creator.id == b.me.id:
