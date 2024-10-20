@@ -134,14 +134,12 @@ async def pending_channels(client, message):
     channels = await pending_collection_1.find({}).to_list(length=None)
     
     buttons = [
-        [InlineKeyboardButton(f"{ch['name']}", callback_data=f"show_channel_{ch['chat_id']}")]
+        [InlineKeyboardButton(f"{ch['name']}", callback_data=f"show_channel_1_{ch['chat_id']}")]
         for ch in channels
     ]
     
-    # Add the "Add New Channel" button even if there are no pending channels
     buttons.append([InlineKeyboardButton("➕ Add New Channel", callback_data="add_channel_1")])
     
-    # Check if there are no channels and display a message
     if not channels:
         await message.reply(text="No pending channels.", reply_markup=InlineKeyboardMarkup(buttons))
     else:
@@ -152,20 +150,59 @@ async def pending_channels_2(client, message):
     channels = await pending_collection_2.find({}).to_list(length=None)
 
     buttons = [
-        [InlineKeyboardButton(f"{ch['name']}", callback_data=f"show_channel_{ch['chat_id']}")]
+        [InlineKeyboardButton(f"{ch['name']}", callback_data=f"show_channel_2_{ch['chat_id']}")]
         for ch in channels
     ]
     
-    # Add the "Add New Channel" button even if there are no pending channels
     buttons.append([InlineKeyboardButton("➕ Add New Channel", callback_data="add_channel_2")])
     
-    # Check if there are no channels and display a message
     if not channels:
         await message.reply(text="No pending channels.", reply_markup=InlineKeyboardMarkup(buttons))
     else:
         await message.reply(text="Pending Channels for Second FSub:", reply_markup=InlineKeyboardMarkup(buttons))
-        
 
+@Client.on_callback_query(filters.regex(r"^show_channel_1_(\d+)$"))
+async def show_channel_details_1(client: Client, query):
+    chat_id = int(query.data.split("_")[2])
+    channel = await pending_collection_1.find_one({"chat_id": chat_id})
+
+    if channel:
+        buttons = [[InlineKeyboardButton("❌ Remove Channel", callback_data=f"remove_channel_1_{chat_id}")]]
+        await query.message.edit_text(f"Channel Name: {channel['name']}\nChannel ID: {chat_id}",
+                                      reply_markup=InlineKeyboardMarkup(buttons))
+    else:
+        await query.message.reply("Channel not found.")
+    
+    await query.answer()
+
+@Client.on_callback_query(filters.regex(r"^show_channel_2_(\d+)$"))
+async def show_channel_details_2(client: Client, query):
+    chat_id = int(query.data.split("_")[2])
+    channel = await pending_collection_2.find_one({"chat_id": chat_id})
+
+    if channel:
+        buttons = [[InlineKeyboardButton("❌ Remove Channel", callback_data=f"remove_channel_2_{chat_id}")]]
+        await query.message.edit_text(f"Channel Name: {channel['name']}\nChannel ID: {chat_id}",
+                                      reply_markup=InlineKeyboardMarkup(buttons))
+    else:
+        await query.message.reply("Channel not found.")
+    
+    await query.answer()
+
+@Client.on_callback_query(filters.regex(r"^remove_channel_1_(\d+)$"))
+async def remove_channel_1(client: Client, query):
+    chat_id = int(query.data.split("_")[2])
+    await pending_collection_1.delete_one({"chat_id": chat_id})
+    await query.message.edit_text(f"Channel {chat_id} has been removed from the pending list.")
+    await query.answer()
+
+@Client.on_callback_query(filters.regex(r"^remove_channel_2_(\d+)$"))
+async def remove_channel_2(client: Client, query):
+    chat_id = int(query.data.split("_")[2])
+    await pending_collection_2.delete_one({"chat_id": chat_id})
+    await query.message.edit_text(f"Channel {chat_id} has been removed from the pending list.")
+    await query.answer()
+    
 @Client.on_callback_query(filters.regex(r"^add_channel_1$"))
 async def add_channel_1(client: Client, query):
     await query.message.reply("Forward a message from the channel you want to add.")
@@ -238,28 +275,3 @@ async def add_channel_2(client: Client, query):
     # Add the channel to pending list
     await pending_collection_2.insert_one({"chat_id": chat_id, "name": chat_title})
     await forwarded_message.reply(f"Second FSub Channel '{chat_title}' has been added.")
-
-
-@Client.on_callback_query(filters.regex(r"^show_channel_(\d+)$"))
-async def show_channel_details(client: Client, query):
-    chat_id = int(query.data.split("_")[2])
-    channel = await pending_collection_1.find_one({"chat_id": chat_id})
-
-    if channel:
-        buttons = [[InlineKeyboardButton("❌ Remove Channel", callback_data=f"remove_channel_{chat_id}_1")]]
-        await query.message.reply(f"Channel Name: {channel['name']}\nChannel ID: {chat_id}",
-                                  reply_markup=InlineKeyboardMarkup(buttons))
-    else:
-        await query.message.reply("Channel not found.")
-
-@Client.on_callback_query(filters.regex(r"^remove_channel_(\d+)_1$"))
-async def remove_channel_1(client: Client, query):
-    chat_id = int(query.data.split("_")[2])
-    await pending_collection_1.delete_one({"chat_id": chat_id})
-    await query.message.reply(f"Channel {chat_id} has been removed from the pending list.")
-
-@Client.on_callback_query(filters.regex(r"^remove_channel_(\d+)_2$"))
-async def remove_channel_2(client: Client, query):
-    chat_id = int(query.data.split("_")[2])
-    await pending_collection_2.delete_one({"chat_id": chat_id})
-    await query.message.reply(f"Channel {chat_id} has been removed from the pending list.")
