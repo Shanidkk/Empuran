@@ -7,7 +7,7 @@ from database.users_chats_db import db
 import asyncio
 
 mongo_client = AsyncIOMotorClient(DATABASE_URI)
-db = mongo_client["ControllDb"]
+db = mongo_client["AdminStorage"]
 
 request_collection_1 = db["requests_channel_1"]
 request_collection_2 = db["requests_channel_2"]
@@ -241,14 +241,9 @@ async def add_channel_1(client: Client, query):
     
     # Check if bot is an admin in the forwarded channel using try-except
     try:
-        await client.get_chat(chat_id)
-        chat_member = await client.get_chat_member(chat_id, client.me.id)
-        
-        if chat_member.status != "administrator":
-            await forwarded_message.reply(f"The bot is not an admin in the channel '{chat_title}'. Please make the bot an admin and try again.")
-            return
-    except:
-        await forwarded_message.reply(f"Failed to verify bot permissions in channel '{chat_title}'. Ensure the bot is an admin and try again.")
+        await client.get_chat(int(chat_id))     
+    except Exception as e:
+        await forwarded_message.reply(f"Failed to verify bot permissions in channel '{chat_title}'. {e}    Ensure the bot is an admin and try again.")
         return
     
     # Check for duplicates
