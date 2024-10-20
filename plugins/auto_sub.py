@@ -4,6 +4,7 @@ from motor.motor_asyncio import AsyncIOMotorClient
 from utils import temp
 from info import ADMINS, DATABASE_URI
 from database.users_chats_db import db
+import asyncio
 
 mongo_client = AsyncIOMotorClient(DATABASE_URI)
 db = mongo_client["join_request_db"]
@@ -164,25 +165,80 @@ async def pending_channels_2(client, message):
     else:
         await message.reply(text="Pending Channels for Second FSub:", reply_markup=InlineKeyboardMarkup(buttons))
         
+
 @Client.on_callback_query(filters.regex(r"^add_channel_1$"))
 async def add_channel_1(client: Client, query):
     await query.message.reply("Forward a message from the channel you want to add.")
-    forwarded_message = await client.listen(query.message.chat.id, filters.forwarded)
+    
+    # Listen for forwarded message with timeout and error handling
+    try:
+        forwarded_message = await asyncio.wait_for(client.listen(query.message.chat.id, filters.forwarded), timeout=60)
+    except asyncio.TimeoutError:
+        await query.message.reply("Timeout! Please try forwarding the message again.")
+        return
+
+    if not forwarded_message.forward_from_chat:
+        await query.message.reply("This message doesn't seem to be from a channel. Please forward a message from the channel you want to add.")
+        return
     
     chat_id = forwarded_message.forward_from_chat.id
     chat_title = forwarded_message.forward_from_chat.title
+    
+    # Check if bot is an admin in the forwarded channel using try-except
+    try:
+        await client.get_chat(chat_id)
+        chat_member = await client.get_chat_member(chat_id, client.me.id)
+        
+        if chat_member.status != "administrator":
+            await forwarded_message.reply(f"The bot is not an admin in the channel '{chat_title}'. Please make the bot an admin and try again.")
+            return
+    except (ChatAdminRequired, BadRequest):
+        await forwarded_message.reply(f"Failed to verify bot permissions in channel '{chat_title}'. Ensure the bot is an admin and try again.")
+        return
+    
+    # Check for duplicates
+    existing_channel = await pending_collection_1.find_one({"chat_id": chat_id})
+    if existing_channel:
+        await forwarded_message.reply(f"Channel '{chat_title}' is already in the pending list.")
+        return
+    
+    # Add the channel to pending list
     await pending_collection_1.insert_one({"chat_id": chat_id, "name": chat_title})
     await forwarded_message.reply(f"Channel '{chat_title}' has been added.")
 
 @Client.on_callback_query(filters.regex(r"^add_channel_2$"))
 async def add_channel_2(client: Client, query):
     await query.message.reply("Forward a message from the channel you want to add for the second FSub.")
-    forwarded_message = await client.listen(query.message.chat.id, filters.forwarded)
     
-    chat_id = forwarded_message.forward_from_chat.id
+    # Listen for forwarded message with timeout and error handling
+    try:
+        forwarded_message = await asyncio.wait_for(client.listen(query.message.chat.id, filters.forwarded), timeout=60)
+    except asyncio.TimeoutError:
+        await query.message.reply("Timeout! Please try forwarding the message again.")
+        return
+
+    if not forwarded_message.forward_from_chat:
+        await query.message.reply("This message doesn't seem to be from a channel. Please forward a message from the channel you want to add.")
+        return
+    
+    chat_id = int(forwarded_message.forward_from_chat.id)
     chat_title = forwarded_message.forward_from_chat.title
+    
+    # Check if bot is an admin in the forwarded channel using try-except
+    try:
+        await client.get_chat(chat_id)     
+    except (ChatAdminRequired, BadRequest):
+        await forwarded_message.reply(f"Failed to verify bot permissions in channel '{chat_title}'. Ensure the bot is an admin and try again.")
+        return
+    # Check for duplicates
+    existing_channel = await pending_collection_2.find_one({"chat_id": chat_id})
+    if existing_channel:
+        await forwarded_message.reply(f"Channel '{chat_title}' is already in the pending list.")
+        return
+    # Add the channel to pending list
     await pending_collection_2.insert_one({"chat_id": chat_id, "name": chat_title})
     await forwarded_message.reply(f"Second FSub Channel '{chat_title}' has been added.")
+
 
 @Client.on_callback_query(filters.regex(r"^show_channel_(\d+)$"))
 async def show_channel_details(client: Client, query):
