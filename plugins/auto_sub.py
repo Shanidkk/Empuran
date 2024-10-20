@@ -278,9 +278,9 @@ async def add_channel_2(client: Client, query):
     chat_title = forwarded_message.forward_from_chat.title
     # Check if bot is an admin in the forwarded channel using try-except
     try:
-        await client.get_chat(chat_id)     
-    except:
-        await forwarded_message.reply(f"Failed to verify bot permissions in channel '{chat_title}'. Ensure the bot is an admin and try again.")
+        await client.get_chat(int(chat_id))     
+    except Exception as e:
+        await forwarded_message.reply(f"Failed to verify bot permissions in channel '{chat_title}'. {e}    Ensure the bot is an admin and try again.")
         return
     # Check for duplicates
     existing_channel = await pending_collection_2.find_one({"chat_id": chat_id})
