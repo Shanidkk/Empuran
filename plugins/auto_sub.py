@@ -7,7 +7,7 @@ from database.users_chats_db import db
 import asyncio
 
 mongo_client = AsyncIOMotorClient(DATABASE_URI)
-db = mongo_client["join_request_db"]
+db = mongo_client["ControllDb"]
 
 request_collection_1 = db["requests_channel_1"]
 request_collection_2 = db["requests_channel_2"]
