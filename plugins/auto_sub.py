@@ -264,21 +264,18 @@ async def add_channel_1(client: Client, query):
 @Client.on_callback_query(filters.regex(r"^add_channel_2$"))
 async def add_channel_2(client: Client, query):
     await query.message.reply("Forward a message from the channel you want to add for the second FSub.")
-    
     # Listen for forwarded message with timeout and error handling
     try:
         forwarded_message = await asyncio.wait_for(client.listen(query.message.chat.id), timeout=60)
     except asyncio.TimeoutError:
         await query.message.reply("Timeout! Please try forwarding the message again.")
         return
-
     if not forwarded_message.forward_from_chat:
         await query.message.reply("This message doesn't seem to be from a channel. Please forward a message from the channel you want to add.")
         return
     
     chat_id = int(forwarded_message.forward_from_chat.id)
     chat_title = forwarded_message.forward_from_chat.title
-    
     # Check if bot is an admin in the forwarded channel using try-except
     try:
         await client.get_chat(chat_id)     
