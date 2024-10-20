@@ -227,7 +227,7 @@ async def add_channel_1(client: Client, query):
     
     # Listen for forwarded message with timeout and error handling
     try:
-        forwarded_message = await asyncio.wait_for(client.listen(query.message.chat.id, filters.forwarded), timeout=60)
+        forwarded_message = await asyncio.wait_for(client.listen(query.message.chat.id), timeout=60)
     except asyncio.TimeoutError:
         await query.message.reply("Timeout! Please try forwarding the message again.")
         return
@@ -267,7 +267,7 @@ async def add_channel_2(client: Client, query):
     
     # Listen for forwarded message with timeout and error handling
     try:
-        forwarded_message = await asyncio.wait_for(client.listen(query.message.chat.id, filters.forwarded), timeout=60)
+        forwarded_message = await asyncio.wait_for(client.listen(query.message.chat.id), timeout=60)
     except asyncio.TimeoutError:
         await query.message.reply("Timeout! Please try forwarding the message again.")
         return
