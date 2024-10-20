@@ -131,32 +131,39 @@ async def set_request_limit_command(client, message):
 @Client.on_message(filters.command('pending') & filters.private & filters.user(ADMINS))
 async def pending_channels(client, message):
     channels = await pending_collection_1.find({}).to_list(length=None)
-    if not channels:
-        await message.reply(text="No pending channels.")
-        return
-
+    
     buttons = [
         [InlineKeyboardButton(f"{ch['name']}", callback_data=f"show_channel_{ch['chat_id']}")]
         for ch in channels
     ]
+    
+    # Add the "Add New Channel" button even if there are no pending channels
     buttons.append([InlineKeyboardButton("➕ Add New Channel", callback_data="add_channel_1")])
-    await message.reply(text="Pending Channels:", reply_markup=InlineKeyboardMarkup(buttons))
+    
+    # Check if there are no channels and display a message
+    if not channels:
+        await message.reply(text="No pending channels.", reply_markup=InlineKeyboardMarkup(buttons))
+    else:
+        await message.reply(text="Pending Channels:", reply_markup=InlineKeyboardMarkup(buttons))
 
 @Client.on_message(filters.command('pending2') & filters.private & filters.user(ADMINS))
 async def pending_channels_2(client, message):
     channels = await pending_collection_2.find({}).to_list(length=None)
-    
-    if not channels:
-        await message.reply(text="No pending channels.")
-        return
 
     buttons = [
         [InlineKeyboardButton(f"{ch['name']}", callback_data=f"show_channel_{ch['chat_id']}")]
         for ch in channels
     ]
+    
+    # Add the "Add New Channel" button even if there are no pending channels
     buttons.append([InlineKeyboardButton("➕ Add New Channel", callback_data="add_channel_2")])
-    await message.reply(text="Pending Channels for Second FSub:", reply_markup=InlineKeyboardMarkup(buttons))
-
+    
+    # Check if there are no channels and display a message
+    if not channels:
+        await message.reply(text="No pending channels.", reply_markup=InlineKeyboardMarkup(buttons))
+    else:
+        await message.reply(text="Pending Channels for Second FSub:", reply_markup=InlineKeyboardMarkup(buttons))
+        
 @Client.on_callback_query(filters.regex(r"^add_channel_1$"))
 async def add_channel_1(client: Client, query):
     await query.message.reply("Forward a message from the channel you want to add.")
