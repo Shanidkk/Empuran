@@ -145,6 +145,25 @@ async def pending_channels(client, message):
     else:
         await message.reply(text="Pending Channels:", reply_markup=InlineKeyboardMarkup(buttons))
 
+@Client.on_message(filters.command('pending') & filters.private & filters.user(ADMINS))
+async def pending_channels(client, message):
+    channels = await pending_collection_1.find({}).to_list(length=None)
+    
+    buttons = [
+        [InlineKeyboardButton(f"{ch['name']}", callback_data=f"show_channel_1_{ch['chat_id']}")]
+        for ch in channels
+    ]
+    
+    # Always add "Add New Channel" button
+    buttons.append([InlineKeyboardButton("➕ Add New Channel", callback_data="add_channel_1")])
+    
+    # If no channels, notify admin
+    if not channels:
+        await message.reply(text="No pending channels.", reply_markup=InlineKeyboardMarkup(buttons))
+    else:
+        await message.reply(text="Pending Channels:", reply_markup=InlineKeyboardMarkup(buttons))
+
+# Fetch pending channels for the second Force Sub mode
 @Client.on_message(filters.command('pending2') & filters.private & filters.user(ADMINS))
 async def pending_channels_2(client, message):
     channels = await pending_collection_2.find({}).to_list(length=None)
@@ -154,6 +173,7 @@ async def pending_channels_2(client, message):
         for ch in channels
     ]
     
+    # Always add "Add New Channel" button
     buttons.append([InlineKeyboardButton("➕ Add New Channel", callback_data="add_channel_2")])
     
     if not channels:
@@ -161,6 +181,7 @@ async def pending_channels_2(client, message):
     else:
         await message.reply(text="Pending Channels for Second FSub:", reply_markup=InlineKeyboardMarkup(buttons))
 
+# Handle showing channel details and options for the first Force Sub mode
 @Client.on_callback_query(filters.regex(r"^show_channel_1_(\d+)$"))
 async def show_channel_details_1(client: Client, query):
     chat_id = int(query.data.split("_")[2])
@@ -172,9 +193,8 @@ async def show_channel_details_1(client: Client, query):
                                       reply_markup=InlineKeyboardMarkup(buttons))
     else:
         await query.message.reply("Channel not found.")
-    
-    await query.answer()
 
+# Handle showing channel details and options for the second Force Sub mode
 @Client.on_callback_query(filters.regex(r"^show_channel_2_(\d+)$"))
 async def show_channel_details_2(client: Client, query):
     chat_id = int(query.data.split("_")[2])
@@ -186,22 +206,20 @@ async def show_channel_details_2(client: Client, query):
                                       reply_markup=InlineKeyboardMarkup(buttons))
     else:
         await query.message.reply("Channel not found.")
-    
-    await query.answer()
 
+# Handle removing a channel from the pending list (first Force Sub mode)
 @Client.on_callback_query(filters.regex(r"^remove_channel_1_(\d+)$"))
 async def remove_channel_1(client: Client, query):
     chat_id = int(query.data.split("_")[2])
     await pending_collection_1.delete_one({"chat_id": chat_id})
     await query.message.edit_text(f"Channel {chat_id} has been removed from the pending list.")
-    await query.answer()
 
+# Handle removing a channel from the pending list (second Force Sub mode)
 @Client.on_callback_query(filters.regex(r"^remove_channel_2_(\d+)$"))
 async def remove_channel_2(client: Client, query):
     chat_id = int(query.data.split("_")[2])
     await pending_collection_2.delete_one({"chat_id": chat_id})
     await query.message.edit_text(f"Channel {chat_id} has been removed from the pending list.")
-    await query.answer()
     
 @Client.on_callback_query(filters.regex(r"^add_channel_1$"))
 async def add_channel_1(client: Client, query):
