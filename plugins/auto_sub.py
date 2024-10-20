@@ -183,7 +183,7 @@ async def pending_channels_2(client, message):
 
 # Handle showing channel details and options for the first Force Sub mode
 async def show_channel_details_1(client: Client, query):
-    chat_id = int(query.data.split("#"))
+    chat_id = int(query.data.split("#")[2])
     channel = await pending_collection_1.find_one({"chat_id": chat_id})
 
     if channel:
@@ -196,7 +196,7 @@ async def show_channel_details_1(client: Client, query):
 # Handle showing channel details and options for the second Force Sub mode
 
 async def show_channel_details_2(client: Client, query):
-    chat_id = int(query.data.split("#"))
+    chat_id = int(query.data.split("#")[2])
     channel = await pending_collection_2.find_one({"chat_id": chat_id})
 
     if channel:
