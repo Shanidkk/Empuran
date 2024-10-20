@@ -134,7 +134,7 @@ async def pending_channels(client, message):
     channels = await pending_collection_1.find({}).to_list(length=None)
     
     buttons = [
-        [InlineKeyboardButton(f"{ch['name']}", callback_data=f"show_channel_1_{ch['chat_id']}")]
+        [InlineKeyboardButton(f"{ch['name']}", callback_data=f"show_channel_1#{ch['chat_id']}")]
         for ch in channels
     ]
     
@@ -150,7 +150,7 @@ async def pending_channels(client, message):
     channels = await pending_collection_1.find({}).to_list(length=None)
     
     buttons = [
-        [InlineKeyboardButton(f"{ch['name']}", callback_data=f"show_channel_1_{ch['chat_id']}")]
+        [InlineKeyboardButton(f"{ch['name']}", callback_data=f"show_channel_1#{ch['chat_id']}")]
         for ch in channels
     ]
     
@@ -169,7 +169,7 @@ async def pending_channels_2(client, message):
     channels = await pending_collection_2.find({}).to_list(length=None)
 
     buttons = [
-        [InlineKeyboardButton(f"{ch['name']}", callback_data=f"show_channel_2_{ch['chat_id']}")]
+        [InlineKeyboardButton(f"{ch['name']}", callback_data=f"show_channel_2#{ch['chat_id']}")]
         for ch in channels
     ]
     
@@ -182,42 +182,40 @@ async def pending_channels_2(client, message):
         await message.reply(text="Pending Channels for Second FSub:", reply_markup=InlineKeyboardMarkup(buttons))
 
 # Handle showing channel details and options for the first Force Sub mode
-@Client.on_callback_query(filters.regex(r"^show_channel_1_(\d+)$"))
 async def show_channel_details_1(client: Client, query):
-    chat_id = int(query.data.split("_")[2])
+    chat_id = int(query.data.split("#"))
     channel = await pending_collection_1.find_one({"chat_id": chat_id})
 
     if channel:
-        buttons = [[InlineKeyboardButton("❌ Remove Channel", callback_data=f"remove_channel_1_{chat_id}")]]
+        buttons = [[InlineKeyboardButton("❌ Remove Channel", callback_data=f"remove_channel_1#{chat_id}")]]
         await query.message.edit_text(f"Channel Name: {channel['name']}\nChannel ID: {chat_id}",
                                       reply_markup=InlineKeyboardMarkup(buttons))
     else:
         await query.message.reply("Channel not found.")
 
 # Handle showing channel details and options for the second Force Sub mode
-@Client.on_callback_query(filters.regex(r"^show_channel_2_(\d+)$"))
+
 async def show_channel_details_2(client: Client, query):
-    chat_id = int(query.data.split("_")[2])
+    chat_id = int(query.data.split("#"))
     channel = await pending_collection_2.find_one({"chat_id": chat_id})
 
     if channel:
-        buttons = [[InlineKeyboardButton("❌ Remove Channel", callback_data=f"remove_channel_2_{chat_id}")]]
+        buttons = [[InlineKeyboardButton("❌ Remove Channel", callback_data=f"remove_channel_2#{chat_id}")]]
         await query.message.edit_text(f"Channel Name: {channel['name']}\nChannel ID: {chat_id}",
                                       reply_markup=InlineKeyboardMarkup(buttons))
     else:
         await query.message.reply("Channel not found.")
 
 # Handle removing a channel from the pending list (first Force Sub mode)
-@Client.on_callback_query(filters.regex(r"^remove_channel_1_(\d+)$"))
+
 async def remove_channel_1(client: Client, query):
-    chat_id = int(query.data.split("_")[2])
+    chat_id = int(query.data.split("#"))
     await pending_collection_1.delete_one({"chat_id": chat_id})
     await query.message.edit_text(f"Channel {chat_id} has been removed from the pending list.")
 
 # Handle removing a channel from the pending list (second Force Sub mode)
-@Client.on_callback_query(filters.regex(r"^remove_channel_2_(\d+)$"))
 async def remove_channel_2(client: Client, query):
-    chat_id = int(query.data.split("_")[2])
+    chat_id = int(query.data.split("#"))
     await pending_collection_2.delete_one({"chat_id": chat_id})
     await query.message.edit_text(f"Channel {chat_id} has been removed from the pending list.")
     
