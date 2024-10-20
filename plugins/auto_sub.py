@@ -183,7 +183,7 @@ async def pending_channels_2(client, message):
 
 # Handle showing channel details and options for the first Force Sub mode
 async def show_channel_details_1(client: Client, query):
-    chat_id = query.data.split("#")
+    _, chat_id = query.data.split("#")
     channel = await pending_collection_1.find_one({"chat_id": chat_id})
 
     if channel:
@@ -196,7 +196,7 @@ async def show_channel_details_1(client: Client, query):
 # Handle showing channel details and options for the second Force Sub mode
 
 async def show_channel_details_2(client: Client, query):
-    chat_id = query.data.split("#")
+    _, chat_id = query.data.split("#")
     channel = await pending_collection_2.find_one({"chat_id": chat_id})
 
     if channel:
@@ -209,13 +209,15 @@ async def show_channel_details_2(client: Client, query):
 # Handle removing a channel from the pending list (first Force Sub mode)
 
 async def remove_channel_1(client: Client, query):
-    chat_id = int(query.data.split("#"))
+    _, chat_id = query.data.split("#")
+    chat_id = int(chat_id)
     await pending_collection_1.delete_one({"chat_id": chat_id})
     await query.message.edit_text(f"Channel {chat_id} has been removed from the pending list.")
 
 # Handle removing a channel from the pending list (second Force Sub mode)
 async def remove_channel_2(client: Client, query):
-    chat_id = int(query.data.split("#"))
+    _, chat_id = query.data.split("#")
+    chat_id = int(chat_id)
     await pending_collection_2.delete_one({"chat_id": chat_id})
     await query.message.edit_text(f"Channel {chat_id} has been removed from the pending list.")
     
