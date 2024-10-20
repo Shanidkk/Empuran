@@ -20,8 +20,12 @@ import os
 import sys
 from dotenv import load_dotenv
 from pyromod import listen 
+from pyrogram import utils as pyroutils
 
 load_dotenv("./dynamic.env", override=True, encoding="utf-8")
+
+pyroutils.MIN_CHAT_ID = -999999999999
+pyroutils.MIN_CHANNEL_ID = -100999999999999
 
 async def restart_bot(bot):
     progress_document = restarti.find_one({"_id": "frestart"})
