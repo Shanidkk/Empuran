@@ -30,7 +30,7 @@ from .auto_sub import remove_channel_2, remove_channel_1, show_channel_details_2
 
 logger = logging.getLogger(__name__)
 # Disable logging completely
-logging.getLogger().setLevel(logging.CRITICAL)
+#logging.getLogger().setLevel(logging.CRITICAL)
 
 BUTTONS = {}
 SPELL_CHECK = {}
