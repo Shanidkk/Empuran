@@ -25,6 +25,8 @@ from database.filters_mdb import (
 from database.gfilters_mdb import find_gfilter, get_gfilters
 import logging
 from plugins.commands import incol
+from .auto_sub import remove_channel_2, remove_channel_1, show_channel_details_2, show_channel_details_1
+
 
 logger = logging.getLogger(__name__)
 # Disable logging completely
@@ -165,6 +167,14 @@ async def advantage_spoll_choker(bot, query):
 async def cb_handler(client: Client, query: CallbackQuery):
     if query.data == "close_data":
         await query.message.delete()
+    elif query.data.startswith("show_channel_1"):
+        await show_channel_details_1(client, query)
+    elif query.data.startswith("show_channel_2"):
+        await show_channel_details_2(client, query)
+    elif query.data.startswith("remove_channel_1"):
+        await remove_channel_1(client, query)
+    elif query.data.startswith("remove_channel_2"):
+        await remove_channel_2(client, query)
     elif query.data == "delallconfirm":
         userid = query.from_user.id
         chat_type = query.message.chat.type
