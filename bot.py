@@ -19,6 +19,7 @@ from plugins.commands import restarti
 import os 
 import sys
 from dotenv import load_dotenv
+from pyromod import listen 
 
 load_dotenv("./dynamic.env", override=True, encoding="utf-8")
 
