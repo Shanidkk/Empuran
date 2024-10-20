@@ -1,5 +1,6 @@
 git+https://github.com/KurimuzonAkuma/pyrogram
 git+https://github.com/agronholm/anyio
+pyromod==1.5
 tgcrypto
 aiohttp
 pymongo[srv]==4.3.3
