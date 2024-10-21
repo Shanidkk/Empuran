@@ -148,12 +148,10 @@ async def pending_channels(client, message):
 @Client.on_message(filters.command('pending') & filters.private & filters.user(ADMINS))
 async def pending_channels(client, message):
     channels = await pending_collection_1.find({}).to_list(length=None)
-    
     buttons = [
         [InlineKeyboardButton(f"{ch['name']}", callback_data=f"show_channel_1#{ch['chat_id']}")]
         for ch in channels
     ]
-    
     # Always add "Add New Channel" button
     buttons.append([InlineKeyboardButton("➕ Add New Channel", callback_data="add_channel_1")])
     
@@ -226,7 +224,6 @@ async def remove_channel_2(client: Client, query):
 @Client.on_callback_query(filters.regex(r"^add_channel_1$"))
 async def add_channel_1(client: Client, query):
     await query.message.reply("Forward a message from the channel you want to add.")
-    
     # Listen for forwarded message with timeout and error handling
     try:
         forwarded_message = await asyncio.wait_for(client.listen(query.message.chat.id), timeout=60)
@@ -270,7 +267,6 @@ async def add_channel_2(client: Client, query):
     if not forwarded_message.forward_from_chat:
         await query.message.reply("This message doesn't seem to be from a channel. Please forward a message from the channel you want to add.")
         return
-    
     chat_id = int(forwarded_message.forward_from_chat.id)
     chat_title = forwarded_message.forward_from_chat.title
     # Check if bot is an admin in the forwarded channel using try-except
