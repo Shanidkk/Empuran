@@ -184,7 +184,8 @@ async def pending_channels_2(client, message):
 # Handle showing channel details and options for the first Force Sub mode
 async def show_channel_details_1(client: Client, query):
     _, chat_id = query.data.split("#")
-    channel = await pending_collection_1.find_one({"chat_id": chat_id})
+    print(chat_id)
+    channel = await pending_collection_1.find_one({"chat_id": int(chat_id)})
 
     if channel:
         buttons = [[InlineKeyboardButton("❌ Remove Channel", callback_data=f"remove_channel_1#{chat_id}")]]
@@ -197,7 +198,8 @@ async def show_channel_details_1(client: Client, query):
 
 async def show_channel_details_2(client: Client, query):
     _, chat_id = query.data.split("#")
-    channel = await pending_collection_2.find_one({"chat_id": chat_id})
+    print(chat_id)
+    channel = await pending_collection_2.find_one({"chat_id": int(chat_id)})
 
     if channel:
         buttons = [[InlineKeyboardButton("❌ Remove Channel", callback_data=f"remove_channel_2#{chat_id}")]]
@@ -236,7 +238,7 @@ async def add_channel_1(client: Client, query):
         await query.message.reply("This message doesn't seem to be from a channel. Please forward a message from the channel you want to add.")
         return
     
-    chat_id = forwarded_message.forward_from_chat.id
+    chat_id = int(forwarded_message.forward_from_chat.id)
     chat_title = forwarded_message.forward_from_chat.title
     
     # Check if bot is an admin in the forwarded channel using try-except
