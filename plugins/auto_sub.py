@@ -148,36 +148,70 @@ async def pending_channels(client, message):
 @Client.on_message(filters.command('pending') & filters.private & filters.user(ADMINS))
 async def pending_channels(client, message):
     channels = await pending_collection_1.find({}).to_list(length=None)
+    
+    # Fetch current FSub chat and mode details
+    current_fsub_chat = await db.get_fsub_chat()
+    current_fsub_mode = await db.get_fsub_mode1()
+
+    # Creating buttons for each pending channel
     buttons = [
         [InlineKeyboardButton(f"{ch['name']}", callback_data=f"show_channel_1#{ch['chat_id']}")]
         for ch in channels
     ]
-    # Always add "Add New Channel" button
+    
+    # Add "Add New Channel" button
     buttons.append([InlineKeyboardButton("➕ Add New Channel", callback_data="add_channel_1")])
     
-    # If no channels, notify admin
+    # Text detailing current processing and FSub mode
+    processing_text = (
+        f"**Pending Channels in First Force Sub Mode**\n"
+        f"Total Channels Pending: {len(channels)}\n\n"
+        f"**Current Force Sub Settings**\n"
+        f"- Chat ID: {current_fsub_chat['chat_id']}\n"
+        f"- FSub Mode: {current_fsub_mode['mode']}\n\n"
+        "You can view the pending channels or add a new one using the buttons below."
+    )
+    
+    # Reply with detailed text and buttons
     if not channels:
-        await message.reply(text="No pending channels.", reply_markup=InlineKeyboardMarkup(buttons))
+        await message.reply(text=f"No pending channels.\n\n{processing_text}", reply_markup=InlineKeyboardMarkup(buttons))
     else:
-        await message.reply(text="Pending Channels:", reply_markup=InlineKeyboardMarkup(buttons))
+        await message.reply(text=processing_text, reply_markup=InlineKeyboardMarkup(buttons))
 
-# Fetch pending channels for the second Force Sub mode
+
 @Client.on_message(filters.command('pending2') & filters.private & filters.user(ADMINS))
 async def pending_channels_2(client, message):
     channels = await pending_collection_2.find({}).to_list(length=None)
+    
+    # Fetch current FSub chat and mode details for the second mode
+    current_fsub_chat_2 = await db.get_fsub_chat2()
+    current_fsub_mode_2 = await db.get_fsub_mode2()
 
+    # Creating buttons for each pending channel
     buttons = [
         [InlineKeyboardButton(f"{ch['name']}", callback_data=f"show_channel_2#{ch['chat_id']}")]
         for ch in channels
     ]
     
-    # Always add "Add New Channel" button
+    # Add "Add New Channel" button
     buttons.append([InlineKeyboardButton("➕ Add New Channel", callback_data="add_channel_2")])
     
+    # Text detailing current processing and FSub mode
+    processing_text_2 = (
+        f"**Pending Channels in Second Force Sub Mode**\n"
+        f"Total Channels Pending: {len(channels)}\n\n"
+        f"**Current Force Sub Settings**\n"
+        f"- Chat ID: {current_fsub_chat_2['chat_id']}\n"
+        f"- FSub Mode: {current_fsub_mode_2['mode']}\n\n"
+        "You can view the pending channels or add a new one using the buttons below."
+    )
+
+    # Reply with detailed text and buttons
     if not channels:
-        await message.reply(text="No pending channels.", reply_markup=InlineKeyboardMarkup(buttons))
+        await message.reply(text=f"No pending channels.\n\n{processing_text_2}", reply_markup=InlineKeyboardMarkup(buttons))
     else:
-        await message.reply(text="Pending Channels for Second FSub:", reply_markup=InlineKeyboardMarkup(buttons))
+        await message.reply(text=processing_text_2, reply_markup=InlineKeyboardMarkup(buttons))
+
 
 # Handle showing channel details and options for the first Force Sub mode
 async def show_channel_details_1(client: Client, query):
