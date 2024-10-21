@@ -151,8 +151,6 @@ async def pending_channels(client, message):
     
     # Fetch current FSub chat and mode details
     current_fsub_chat = await db.get_fsub_chat()
-    current_fsub_mode = await db.get_fsub_mode1()
-
     # Creating buttons for each pending channel
     buttons = [
         [InlineKeyboardButton(f"{ch['name']}", callback_data=f"show_channel_1#{ch['chat_id']}")]
@@ -168,7 +166,6 @@ async def pending_channels(client, message):
         f"Total Channels Pending: {len(channels)}\n\n"
         f"**Current Force Sub Settings**\n"
         f"- Chat ID: {current_fsub_chat['chat_id']}\n"
-        f"- FSub Mode: {current_fsub_mode['mode']}\n\n"
         "You can view the pending channels or add a new one using the buttons below."
     )
     
@@ -185,8 +182,6 @@ async def pending_channels_2(client, message):
     
     # Fetch current FSub chat and mode details for the second mode
     current_fsub_chat_2 = await db.get_fsub_chat2()
-    current_fsub_mode_2 = await db.get_fsub_mode2()
-
     # Creating buttons for each pending channel
     buttons = [
         [InlineKeyboardButton(f"{ch['name']}", callback_data=f"show_channel_2#{ch['chat_id']}")]
@@ -202,7 +197,6 @@ async def pending_channels_2(client, message):
         f"Total Channels Pending: {len(channels)}\n\n"
         f"**Current Force Sub Settings**\n"
         f"- Chat ID: {current_fsub_chat_2['chat_id']}\n"
-        f"- FSub Mode: {current_fsub_mode_2['mode']}\n\n"
         "You can view the pending channels or add a new one using the buttons below."
     )
 
