@@ -7,13 +7,13 @@ from database.users_chats_db import db
 import asyncio
 
 mongo_client = AsyncIOMotorClient(DATABASE_URI)
-db = mongo_client["AdminStorage"]
+db2 = mongo_client["AdminStorage"]
 
-request_collection_1 = db["requests_channel_1"]
-request_collection_2 = db["requests_channel_2"]
-pending_collection_1 = db["pending_channels_1"]
-pending_collection_2 = db["pending_channels_2"]
-settings_collection = db["channel_settings"]
+request_collection_1 = db2["requests_channel_1"]
+request_collection_2 = db2["requests_channel_2"]
+pending_collection_1 = db2["pending_channels_1"]
+pending_collection_2 = db2["pending_channels_2"]
+settings_collection = db2["channel_settings"]
 
 async def add_request(chat_id: int, user_id: int, collection):
     existing_request = await collection.find_one({"chat_id": chat_id, "user_id": user_id})
