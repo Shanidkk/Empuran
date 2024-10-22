@@ -78,28 +78,31 @@ async def complete_switching2(chat, bot):
     temp.REQ_CHANNEL2 = chat
     await notify_admin_channel(bot, 2, chat, link)
 
+# FIX: Ensure correct switching logic and reset requests
 async def switch_channel(chat_id, fsub_mode, pending_collection, collection, bot):
     if fsub_mode == 0:
-        return 
-    next_channel = await get_next_pending_channel(pending_collection)
-    if next_channel:
-        await remove_pending_channel(next_channel, pending_collection)
-        if fsub_mode == 1:
-            await complete_switching1(next_channel, bot)
+        return
+    async with asyncio.Lock():  # Prevent race conditions
+        next_channel = await get_next_pending_channel(pending_collection)
+        if next_channel:
+            await remove_pending_channel(next_channel, pending_collection)
+            # Reset requests for the current channel before switching
+            await collection.update_one({"chat_id": chat_id}, {"$set": {"total_requests": 0}})
+            
+            if fsub_mode == 1:
+                await complete_switching1(next_channel, bot)
+            else:
+                await complete_switching2(next_channel, bot)
+            print(f"Switched to new channel {next_channel} for Force Sub mode {fsub_mode}")
         else:
-            await complete_switching2(next_channel, bot)
-        print(f"Switched to new channel {next_channel} for Force Sub mode {fsub_mode}")
-    else:
-        print(f"No more pending channels to switch to for mode {fsub_mode}")
+            print(f"No more pending channels to switch to for mode {fsub_mode}")
 
 @Client.on_chat_join_request()
 async def join_reqs(b, join_req: ChatJoinRequest):
     user_id = join_req.from_user.id
     chat_id = join_req.chat.id
     mode = 0
-
     request_limit = await get_request_limit()
-
     if chat_id == temp.REQ_CHANNEL1:
         mode = 1
         if join_req.invite_link.creator.id == b.me.id:
@@ -145,69 +148,25 @@ async def pending_channels(client, message):
     else:
         await message.reply(text="Pending Channels:", reply_markup=InlineKeyboardMarkup(buttons))
 
-@Client.on_message(filters.command('pending') & filters.private & filters.user(ADMINS))
-async def pending_channels(client, message):
-    channels = await pending_collection_1.find({}).to_list(length=None)
-    
-    # Fetch current FSub chat and mode details
-    current_fsub_chat = await db.get_fsub_chat()
-    # Creating buttons for each pending channel
-    buttons = [
-        [InlineKeyboardButton(f"{ch['name']}", callback_data=f"show_channel_1#{ch['chat_id']}")]
-        for ch in channels
-    ]
-    
-    # Add "Add New Channel" button
-    buttons.append([InlineKeyboardButton("➕ Add New Channel", callback_data="add_channel_1")])
-    
-    # Text detailing current processing and FSub mode
-    processing_text = (
-        f"**Pending Channels in First Force Sub Mode**\n"
-        f"Total Channels Pending: {len(channels)}\n\n"
-        f"**Current Force Sub Settings**\n"
-        f"- Chat ID: {current_fsub_chat['chat_id']}\n"
-        "You can view the pending channels or add a new one using the buttons below."
-    )
-    
-    # Reply with detailed text and buttons
-    if not channels:
-        await message.reply(text=f"No pending channels.\n\n{processing_text}", reply_markup=InlineKeyboardMarkup(buttons))
-    else:
-        await message.reply(text=processing_text, reply_markup=InlineKeyboardMarkup(buttons))
-
-
 @Client.on_message(filters.command('pending2') & filters.private & filters.user(ADMINS))
 async def pending_channels_2(client, message):
     channels = await pending_collection_2.find({}).to_list(length=None)
     
-    # Fetch current FSub chat and mode details for the second mode
-    current_fsub_chat_2 = await db.get_fsub_chat2()
-    # Creating buttons for each pending channel
     buttons = [
         [InlineKeyboardButton(f"{ch['name']}", callback_data=f"show_channel_2#{ch['chat_id']}")]
         for ch in channels
     ]
     
-    # Add "Add New Channel" button
     buttons.append([InlineKeyboardButton("➕ Add New Channel", callback_data="add_channel_2")])
     
-    # Text detailing current processing and FSub mode
-    processing_text_2 = (
-        f"**Pending Channels in Second Force Sub Mode**\n"
-        f"Total Channels Pending: {len(channels)}\n\n"
-        f"**Current Force Sub Settings**\n"
-        f"- Chat ID: {current_fsub_chat_2['chat_id']}\n"
-        "You can view the pending channels or add a new one using the buttons below."
-    )
-
-    # Reply with detailed text and buttons
     if not channels:
-        await message.reply(text=f"No pending channels.\n\n{processing_text_2}", reply_markup=InlineKeyboardMarkup(buttons))
+        await message.reply(text="No pending channels.", reply_markup=InlineKeyboardMarkup(buttons))
     else:
-        await message.reply(text=processing_text_2, reply_markup=InlineKeyboardMarkup(buttons))
+        await message.reply(text="Pending Channels:", reply_markup=InlineKeyboardMarkup(buttons))
+
+# Add more logic to handle other situations...
 
 
-# Handle showing channel details and options for the first Force Sub mode
 async def show_channel_details_1(client: Client, query):
     _, chat_id = query.data.split("#")
     print(chat_id)
