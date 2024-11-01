@@ -26,11 +26,11 @@ from database.gfilters_mdb import find_gfilter, get_gfilters
 import logging
 from plugins.commands import incol
 from .auto_sub import remove_channel_2, remove_channel_1, show_channel_details_2, show_channel_details_1
-
+from .auto_flst import get_autofilter_status
 
 logger = logging.getLogger(__name__)
 # Disable logging completely
-#logging.getLogger().setLevel(logging.CRITICAL)
+logging.getLogger().setLevel(logging.CRITICAL)
 
 BUTTONS = {}
 SPELL_CHECK = {}
@@ -38,6 +38,9 @@ SPELL_CHECK = {}
 
 @Client.on_message(filters.group & filters.text & filters.incoming)
 async def give_filter(client, message):
+    status = get_autofilter_status(message.chat.id)
+    if not status:
+        return 
     g = await global_filters(client, message)
     if g == False:
         k = await manual_filters(client, message)
