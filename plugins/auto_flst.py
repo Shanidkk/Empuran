@@ -22,7 +22,7 @@ def get_autofilter_status(chat_id):
     return doc["autofilter"] if doc else False
 
 # Command to turn autofilter on
-@app.on_message(filters.command("autofilter") & filters.group)
+@Client.on_message(filters.command("autofilter") & filters.group)
 async def toggle_autofilter(client, message):
     chat_id = message.chat.id
     args = message.text.split()
@@ -41,7 +41,7 @@ async def toggle_autofilter(client, message):
         await message.reply_text("Invalid option. Use 'on' or 'off'.")
 
 # Command to check the current autofilter status
-@app.on_message(filters.command("autofilterstatus") & filters.group)
+@Client.on_message(filters.command("autofilterstatus") & filters.group)
 async def autofilter_status(client, message):
     chat_id = message.chat.id
     status = get_autofilter_status(chat_id)
