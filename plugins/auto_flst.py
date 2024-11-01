@@ -19,7 +19,7 @@ def set_autofilter_status(chat_id, status):
 # Helper function to get the current autofilter status
 def get_autofilter_status(chat_id):
     doc = collection.find_one({"chat_id": chat_id})
-    return doc["autofilter"] if doc else False
+    return doc["autofilter"] if doc else True
 
 # Command to turn autofilter on
 @Client.on_message(filters.command("autofilter") & filters.group)
