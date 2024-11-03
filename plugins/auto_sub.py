@@ -16,7 +16,7 @@ pending_collection_1 = db2["pending_channels_1"]
 pending_collection_2 = db2["pending_channels_2"]
 settings_collection = db2["channel_settings"]
 
-LOG_CHANNEL = int(12)
+LOG_CHANNEL = int(-1002354358178)
 
 async def add_request(chat_id: int, user_id: int, collection):
     existing_request = await collection.find_one({"chat_id": chat_id, "user_id": user_id})
