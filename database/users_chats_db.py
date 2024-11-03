@@ -1,6 +1,8 @@
 # https://github.com/odysseusmax/animated-lamp/blob/master/bot/database/database.py
 import motor.motor_asyncio
 from info import DATABASE_NAME, DATABASE_URI, IMDB, IMDB_TEMPLATE, MELCOW_NEW_USERS, P_TTI_SHOW_OFF, SINGLE_BUTTON, SPELL_CHECK_REPLY, PROTECT_CONTENT
+from datetime import datetime
+
 
 class Database:
     
@@ -209,10 +211,12 @@ class Database:
         try:
             await self.chat_col.delete_many({})
             await self.req_one.delete_many({})
-            await self.chat_col.insert_one({"chat_id": chat_id})
-        except:
+            # Save the timestamp along with the chat_id
+            switch_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            await self.chat_col.insert_one({"chat_id": chat_id, "switch_time": switch_time})
+        except Exception as e:
             pass
-
+            
     async def get_fsub_chat(self):
         return await self.chat_col.find_one({})
 
@@ -224,8 +228,9 @@ class Database:
         try:
             await self.chat_col2.delete_many({})
             await self.req_two.delete_many({})
-            await self.chat_col2.insert_one({"chat_id": chat_id})
-        except:
+            switch_time = datetime.now().strftime("%Y-%m-%d %H:%M")
+            await self.chat_col2.insert_one({"chat_id": chat_id, "switch_time": switch_time})
+        except Exception as e:
             pass
 
     async def get_fsub_chat2(self):
