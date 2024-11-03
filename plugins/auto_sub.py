@@ -16,6 +16,8 @@ pending_collection_1 = db2["pending_channels_1"]
 pending_collection_2 = db2["pending_channels_2"]
 settings_collection = db2["channel_settings"]
 
+LOG_CHANNEL = int(12)
+
 async def add_request(chat_id: int, user_id: int, collection):
     existing_request = await collection.find_one({"chat_id": chat_id, "user_id": user_id})
     if not existing_request:
@@ -54,8 +56,7 @@ async def notify_admin_channel(bot, fsub_mode, next_channel, link):
     text = (f"Force Sub mode {fsub_mode} has switched channels.\n"
             f"New Channel ID: {next_channel}\n"
             f"Invite Link: {link}")
-    for id in ADMINS:
-        await bot.send_message(chat_id=id, text=text)
+    await bot.send_message(chat_id=LOG_CHANNEL, text=text)
 
 async def complete_switching1(chat, bot):
     await db.add_fsub_chat(chat)
@@ -126,6 +127,7 @@ async def join_reqs(b, join_req: ChatJoinRequest):
         total_requests = await get_total_requests(chat_id, request_collection_2)
 
     if total_requests >= request_limit:
+        await b.send_message(chat_id=LOG_CHANNEL, text=f"<b>Your Force Sub Limit ({request_limit}) Has Been Completed Your chat {join_req.chat.title} Has Completed {request_limit}\nYou Can Sale it now!</b>")
         if mode == 1:
             await switch_channel(chat_id, mode, pending_collection_1, request_collection_1, b)
         elif mode == 2:
