@@ -5,6 +5,7 @@ from utils import temp
 from info import ADMINS, DATABASE_URI
 from database.users_chats_db import db
 import asyncio
+from datetime import datetime
 
 mongo_client = AsyncIOMotorClient(DATABASE_URI)
 db2 = mongo_client["AdminStorage"]
@@ -78,7 +79,7 @@ async def complete_switching2(chat, bot):
     temp.REQ_CHANNEL2 = chat
     await notify_admin_channel(bot, 2, chat, link)
 
-# FIX: Ensure correct switching logic and reset requests
+
 async def switch_channel(chat_id, fsub_mode, pending_collection, collection, bot):
     if fsub_mode == 0:
         return
@@ -88,7 +89,13 @@ async def switch_channel(chat_id, fsub_mode, pending_collection, collection, bot
             await remove_pending_channel(next_channel, pending_collection)
             # Reset requests for the current channel before switching
             await collection.update_one({"chat_id": chat_id}, {"$set": {"total_requests": 0}})
-            
+            switch_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            await collection.update_one(
+                {"chat_id": next_channel},
+                {"$set": {"switch_time": switch_time}},
+                upsert=True
+            )
+
             if fsub_mode == 1:
                 await complete_switching1(next_channel, bot)
             else:
@@ -96,6 +103,7 @@ async def switch_channel(chat_id, fsub_mode, pending_collection, collection, bot
             print(f"Switched to new channel {next_channel} for Force Sub mode {fsub_mode}")
         else:
             print(f"No more pending channels to switch to for mode {fsub_mode}")
+
 
 @Client.on_chat_join_request()
 async def join_reqs(b, join_req: ChatJoinRequest):
