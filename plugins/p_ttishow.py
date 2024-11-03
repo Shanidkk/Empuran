@@ -315,14 +315,29 @@ async def total_requests(bot, message):
             mode2 = "normal"
     else:
         mode2 = "normal"
+        
     if temp.REQ_CHANNEL1 != False: 
         req_channel1 = await bot.get_chat(int(temp.REQ_CHANNEL1))
         req_channel1 = req_channel1.title
+        # Fetch the switch time for Channel 1
+        channel1_data = await db.chat_col.find_one({"chat_id": temp.REQ_CHANNEL1})
+        switch_time1 = channel1_data.get("switch_time", "No record") if channel1_data else "No record"
     else:
         req_channel1 = "REQ_CHANNEL1"
+        switch_time1 = "No record"
+        
     if temp.REQ_CHANNEL2 != False:
         req_channel2 = await bot.get_chat(int(temp.REQ_CHANNEL2))
         req_channel2 = req_channel2.title
+        # Fetch the switch time for Channel 2
+        channel2_data = await db.chat_col2.find_one({"chat_id": temp.REQ_CHANNEL2})
+        switch_time2 = channel2_data.get("switch_time", "No record") if channel2_data else "No record"
     else:
         req_channel2 = "REQ_CHANNEL2"
-    await rju.edit(f"{req_channel1} : {total_one}\n{req_channel2} : {total_two}\n\nMode1 : {mode1}\nMode2 : {mode2}")
+        switch_time2 = "No record"
+        
+    await rju.edit(
+        f"{req_channel1} : {total_one}\nSwitch Time: {switch_time1}\n\n"
+        f"{req_channel2} : {total_two}\nSwitch Time: {switch_time2}\n\n"
+        f"Mode1 : {mode1}\nMode2 : {mode2}"
+    )
