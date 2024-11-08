@@ -4,6 +4,7 @@ import asyncio
 import os
 import sys
 from datetime import timedelta
+import pymongo
 
 # Get logging configurations
 logging.config.fileConfig('logging.conf')
