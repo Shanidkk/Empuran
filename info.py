@@ -13,9 +13,9 @@ def is_enabled(value, default):
 
 # Bot information
 SESSION = environ.get('SESSION', 'MrBean')
-API_ID = int(environ.get("API_ID", "25578852"))
-API_HASH = environ.get("API_HASH", "1c8e30eae03f9600dfdee4408db4811a")
-BOT_TOKEN = environ.get("BOT_TOKEN", "7782804356:AAF_ffpaJFp2smXUw0ElCqhq8ohNcq_hxMU")
+API_ID = int(environ.get("API_ID", "18674011"))
+API_HASH = environ.get("API_HASH", "38d3664512757d8830601169eff5a1de")
+BOT_TOKEN = environ.get("BOT_TOKEN", "7501840484:AAESoXtpv2w7fR_XEtdTVpurBhJGKFr4SKs")
 
 # Bot settings
 CACHE_TIME = int(environ.get('CACHE_TIME', 300))
@@ -36,9 +36,9 @@ REQ_CHANNEL2=environ.get("REQ_CHANNEL2")
 REQ_CHANNEL2 = (int(REQ_CHANNEL2) if REQ_CHANNEL2 and id_pattern.search(REQ_CHANNEL2) else False) if REQ_CHANNEL2 is not None else None
 
 # MongoDB information
-DATABASE_URI = environ.get('DATABASE_URI', "mongodb+srv://H:H@cluster0.ejmxv.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
-DATABASE_URI2 = environ.get('DATABASE_URI2', "mongodb+srv://J:J@cluster0.umwp9.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
-DATABASE_URI3 = environ.get('DATABASE_URI3', "mongodb+srv://K:K@cluster0.a6pa8.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
+DATABASE_URI = environ.get('DATABASE_URI', "mongodb+srv://A:A@cluster0.omlx0.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
+DATABASE_URI2 = environ.get('DATABASE_URI2', "mongodb+srv://B:B@cluster0.44s18.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
+DATABASE_URI3 = environ.get('DATABASE_URI3', "mongodb+srv://C:C@cluster0.32azz.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
 DATABASE_NAME = environ.get('DATABASE_NAME', "Cluster0")
 COLLECTION_NAME = environ.get('COLLECTION_NAME', 'Telegram_files')
 
