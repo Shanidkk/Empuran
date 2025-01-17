@@ -46,7 +46,7 @@ class Bot(Client):
         )
         self.restart_task = None  # Background task for scheduled restarts
 
-    async def start(self):
+    async def start(self, **kwargs):
         # Start the bot and set up a periodic restart
         await super().start()
         await self.setup_periodic_restart()
