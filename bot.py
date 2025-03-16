@@ -31,7 +31,7 @@ pyroutils.MIN_CHAT_ID = -999999999999
 pyroutils.MIN_CHANNEL_ID = -100999999999999
 
 # Define the restart interval in hours (e.g., 5 hours)
-RESTART_INTERVAL_HOURS = 5
+RESTART_INTERVAL_HOURS = 168
 
 class Bot(Client):
     def __init__(self):
