@@ -192,11 +192,10 @@ Added By - {}
 ID - <code>{}</code>
 Name - {}
 """
-    CUSTOM_FILE_CAPTION = """<b><a href=https://t.me/+rbrxOqODzMtmZjM1>{file_name}
+    CUSTOM_FILE_CAPTION = """<b><a href=https://t.me/+9VaQjENdcpVjOTVl>{file_name}
     
 🫶🏼 താഴെ കാണുന്ന ലിങ്കിൽ ജോയിൻ ആയിട്ട് മൂവി ഡൗൺലോഡ് ആക്കുക. എന്നാലെ മൂവി വർക്ക് ആവൂ!!🙇‍♀️
     
 Join Link 👇
-https://t.me/+rbrxOqODzMtmZjM1
-https://t.me/+rbrxOqODzMtmZjM1
-https://t.me/+rbrxOqODzMtmZjM1</a></b>"""
+https://t.me/+9VaQjENdcpVjOTVl
+https://t.me/+9VaQjENdcpVjOTVl</a></b>"""
