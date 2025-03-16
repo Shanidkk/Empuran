@@ -39,7 +39,7 @@ REQ_CHANNEL2 = (int(REQ_CHANNEL2) if REQ_CHANNEL2 and id_pattern.search(REQ_CHAN
 DATABASE_URI = environ.get('DATABASE_URI', "mongodb+srv://A:A@cluster0.omlx0.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
 DATABASE_URI2 = environ.get('DATABASE_URI2', "mongodb+srv://B:B@cluster0.44s18.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
 DATABASE_URI3 = environ.get('DATABASE_URI3', "mongodb+srv://C:C@cluster0.32azz.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
-DATABASE_NAME = environ.get('DATABASE_NAME', "Cluster0")
+DATABASE_NAME = environ.get('DATABASE_NAME', "okayda")
 COLLECTION_NAME = environ.get('COLLECTION_NAME', 'jose')
 
 #Auto approve
