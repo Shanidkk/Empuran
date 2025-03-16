@@ -15,7 +15,7 @@ def is_enabled(value, default):
 SESSION = environ.get('SESSION', 'MrBean')
 API_ID = int(environ.get("API_ID", "18674011"))
 API_HASH = environ.get("API_HASH", "38d3664512757d8830601169eff5a1de")
-BOT_TOKEN = environ.get("BOT_TOKEN", "8130309243:AAGkJyZQGUSbEtMlk0rpEG19lEBnJ_-3YCI")
+BOT_TOKEN = environ.get("BOT_TOKEN", "7501840484:AAESoXtpv2w7fR_XEtdTVpurBhJGKFr4SKs")
 
 # Bot settings
 CACHE_TIME = int(environ.get('CACHE_TIME', 300))
@@ -36,11 +36,11 @@ REQ_CHANNEL2=environ.get("REQ_CHANNEL2")
 REQ_CHANNEL2 = (int(REQ_CHANNEL2) if REQ_CHANNEL2 and id_pattern.search(REQ_CHANNEL2) else False) if REQ_CHANNEL2 is not None else None
 
 # MongoDB information
-DATABASE_URI = environ.get('DATABASE_URI', "mongodb+srv://M:M@cluster0.qbtiu.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
-DATABASE_URI2 = environ.get('DATABASE_URI2', "mongodb+srv://N:N@cluster0.drsrq.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
-DATABASE_URI3 = environ.get('DATABASE_URI3', "mongodb+srv://B:B@cluster0.iew0d.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
-DATABASE_NAME = environ.get('DATABASE_NAME', "super0")
-COLLECTION_NAME = environ.get('COLLECTION_NAME', 'karikku_ulaka')
+DATABASE_URI = environ.get('DATABASE_URI', "mongodb+srv://A:A@cluster0.omlx0.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
+DATABASE_URI2 = environ.get('DATABASE_URI2', "mongodb+srv://B:B@cluster0.44s18.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
+DATABASE_URI3 = environ.get('DATABASE_URI3', "mongodb+srv://C:C@cluster0.32azz.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
+DATABASE_NAME = environ.get('DATABASE_NAME', "Sooper0")
+COLLECTION_NAME = environ.get('COLLECTION_NAME', 'Sooper_files')
 
 #Auto approve
 CHAT_ID = [int(app_chat_id) if id_pattern.search(app_chat_id) else app_chat_id for app_chat_id in environ.get('CHAT_ID', '-1002192898527 -1002156951177 -1002274439678 -1002262472330').split()]
