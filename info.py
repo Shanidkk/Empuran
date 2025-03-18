@@ -35,9 +35,10 @@ REQ_CHANNEL1 = (int(REQ_CHANNEL1) if REQ_CHANNEL1 and id_pattern.search(REQ_CHAN
 REQ_CHANNEL2=environ.get("REQ_CHANNEL2")
 REQ_CHANNEL2 = (int(REQ_CHANNEL2) if REQ_CHANNEL2 and id_pattern.search(REQ_CHANNEL2) else False) if REQ_CHANNEL2 is not None else None
 
-DATABASE_URI = environ.get('DATABASE_URI', "mongodb+srv://A:A@cluster0.omlx0.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
-DATABASE_URI2 = environ.get('DATABASE_URI2', "mongodb+srv://B:B@cluster0.44s18.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
-DATABASE_URI3 = environ.get('DATABASE_URI3', "mongodb+srv://C:C@cluster0.32azz.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
+# MongoDB information
+DATABASE_URI = environ.get('DATABASE_URI', "mongodb+srv://H:H@cluster0.ejmxv.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
+DATABASE_URI2 = environ.get('DATABASE_URI2', "mongodb+srv://J:J@cluster0.umwp9.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
+DATABASE_URI3 = environ.get('DATABASE_URI3', "mongodb+srv://K:K@cluster0.a6pa8.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
 DATABASE_NAME = environ.get('DATABASE_NAME', "Cluster0")
 COLLECTION_NAME = environ.get('COLLECTION_NAME', 'Telegram_files')
 
