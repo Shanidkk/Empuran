@@ -3,6 +3,7 @@ from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from pyrogram.errors.exceptions.bad_request_400 import MessageTooLong, PeerIdInvalid
 from info import ADMINS, LOG_CHANNEL, SUPPORT_CHAT, MELCOW_NEW_USERS
 from database.users_chats_db import db
+from database.join_leave_db import db as fsub_db
 from database.ia_filterdb import Media, Mediaa, db as clientDB, db1 as clientDB2, db2 as clientDB3
 from utils import get_size, temp, get_settings
 from Script import script
@@ -278,66 +279,122 @@ async def list_chats(bot, message):
         await message.reply_document('chats.txt', caption="List Of Chats")
 
 
+@Client.on_message(filters.command('purge') & filters.private & filters.user(ADMINS))
+async def purge_requests(bot, message):
+    args = message.command[1:]
+    if args:  # Purge by chat ID
+        return await confirm_purge(bot, message, f"chat_{args[0]}", f"Chat ID: {args[0]}")
 
-@Client.on_message(filters.command('purge_one') & filters.private & filters.user(ADMINS))
-async def purge_req_one(bot, message):
-    r = await message.reply("`processing...`")
-    await db.delete_all_one()
-    await r.edit("**Req db Cleared**" )
-
-
-@Client.on_message(filters.command('purge_two') & filters.private & filters.user(ADMINS))
-async def purge_req_two(bot, message):
-    r = await message.reply("`processing...`")
-    await db.delete_all_two()
-    await r.edit("**Req db Cleared**" )
-
-@Client.on_message(filters.command("totalreq") & filters.user(ADMINS))
-async def total_requests(bot, message): 
-    rju = await message.reply('Fetching stats..')
-    total_one = await db.get_all_one_count()
-    total_two = await db.get_all_two_count()
-    fsub1 = await db.get_fsub_mode1()
-    if fsub1:
-        fsub1 = fsub1['mode']
-        if fsub1 == "req":
-            mode1 = "request"
-        else:
-            mode1 = "normal"
-    else:
-        mode1 = "normal"
-    fsub2 = await db.get_fsub_mode2()
-    if fsub2:
-        fsub2 = fsub2['mode']
-        if fsub2 == "req":
-            mode2 = "request"
-        else:
-            mode2 = "normal"
-    else:
-        mode2 = "normal"
-        
-    if temp.REQ_CHANNEL1 != False: 
-        req_channel1 = await bot.get_chat(int(temp.REQ_CHANNEL1))
-        req_channel1 = req_channel1.title
-        # Fetch the switch time for Channel 1
-        channel1_data = await db.chat_col.find_one({"chat_id": temp.REQ_CHANNEL1})
-        switch_time1 = channel1_data.get("switch_time", "No record") if channel1_data else "No record"
-    else:
-        req_channel1 = "REQ_CHANNEL1"
-        switch_time1 = "No record"
-        
-    if temp.REQ_CHANNEL2 != False:
-        req_channel2 = await bot.get_chat(int(temp.REQ_CHANNEL2))
-        req_channel2 = req_channel2.title
-        # Fetch the switch time for Channel 2
-        channel2_data = await db.chat_col2.find_one({"chat_id": temp.REQ_CHANNEL2})
-        switch_time2 = channel2_data.get("switch_time", "No record") if channel2_data else "No record"
-    else:
-        req_channel2 = "REQ_CHANNEL2"
-        switch_time2 = "No record"
-        
-    await rju.edit(
-        f"{req_channel1} : {total_one}\nSwitch Time: {switch_time1}\n\n"
-        f"{req_channel2} : {total_two}\nSwitch Time: {switch_time2}\n\n"
-        f"Mode1 : {mode1}\nMode2 : {mode2}"
+    buttons = [
+        [
+            InlineKeyboardButton("🗑 Purge One", callback_data=f"purge_chat_{temp.REQ_CHANNEL1}"),
+            InlineKeyboardButton("🗑 Purge Two", callback_data=f"purge_chat_{temp.REQ_CHANNEL2}"),
+        ],
+        [
+            InlineKeyboardButton("🚨 Purge All", callback_data="purge_all"),
+            InlineKeyboardButton("❌ Cancel", callback_data="purge_cancel"),
+        ]
+    ]
+    await message.reply_text(
+        "⚠️ **Select data to purge. This cannot be undone!**",
+        quote=True,
+        reply_markup=InlineKeyboardMarkup(buttons),
     )
+
+
+async def confirm_purge(bot, message, action, label):
+    buttons = [
+        [
+            InlineKeyboardButton("✅ Yes", callback_data=f"confirm_{action}"),
+            InlineKeyboardButton("❌ No", callback_data="purge_cancel"),
+        ]
+    ]
+    try:
+        await message.edit_text(
+            f"⚠️ **Confirm purge: {label}?**",
+            reply_markup=InlineKeyboardMarkup(buttons)
+        )
+    except Exception:
+        await message.reply_text(
+            f"⚠️ **Confirm purge: {label}?**",
+            quote=True,
+            reply_markup=InlineKeyboardMarkup(buttons)
+        )
+
+
+@Client.on_callback_query(filters.regex("^purge_(all|chat_.+|cancel)$"))
+async def confirm_callback(bot, query):
+    action = query.data.split("_", 1)[1]
+    if action == "cancel":
+        return await query.message.edit_text("❌ **Action Cancelled!**")
+    await confirm_purge(bot, query.message, action, f"Channel {action}" if action != "all" else "All Data")
+
+
+@Client.on_callback_query(filters.regex("^confirm_(all|chat_.+)$"))
+async def execute_purge(bot, query):
+    action = query.data.split("_", 1)[1]
+    if action.startswith("chat"):
+        chat_id = action.split("_")[1]
+        await db.delete_all_reqs(chat_id)
+        msg = f"✅ **Chat ID {chat_id} Cleared!**"
+    else:
+        await db.delete_all_reqs()
+        msg = f"✅ **All Data Cleared!**"
+    
+    await query.message.edit_text(msg)
+
+
+@Client.on_message(filters.command("total_req") & filters.user(ADMINS))
+async def total_requests(bot, message):
+    user_id = message.from_user.id
+    wait = await message.reply_text("Fetching Req Stats..", quote=True)
+
+    # Fetch channel data before iterating
+    channels = []
+    for i, req_channel in enumerate([temp.REQ_CHANNEL1, temp.REQ_CHANNEL2], start=1):
+        if req_channel:
+            total_requests = await db.get_all_reqs_count(int(req_channel))
+            stats = await fsub_db.get_stats(int(req_channel))
+            chat = await bot.get_chat(int(req_channel))
+            channels.append((chat, req_channel, total_requests, stats))
+
+    # Build response text
+    text = "\n\n".join(
+        f"○ {chat.title} [{chat_id}]\n"
+        f"    • Total {total} Requests\n"
+        f"    • Joined : {stats['joined']} | • Left : {stats['left']}"
+        for chat, chat_id, total, stats in channels
+    )
+
+    await wait.edit(text)
+
+    reqs_count_1 = await db.get_all_reqs_count(temp.REQ_CHANNEL1)
+    reqs_count_2 = await db.get_all_reqs_count(temp.REQ_CHANNEL2)
+    channels = [
+        (temp.REQ_CHANNEL1, reqs_count_1, await fsub_db.get_stats(int(temp.REQ_CHANNEL1))),
+        (temp.REQ_CHANNEL2, reqs_count_2, await fsub_db.get_stats(int(temp.REQ_CHANNEL2))),
+    ]
+
+@Client.on_message(filters.command("get_fsub") & filters.user(ADMINS))
+async def channel_info(bot, message):
+    wait = await message.reply_text("Fetching FSUb Stats", quote=True)
+
+    channel_ids = [temp.REQ_CHANNEL1, temp.REQ_CHANNEL2]
+    text = ""
+
+    for index, chat_id in enumerate(channel_ids, start=1):
+        if not chat_id:
+            continue
+
+        chat = await bot.get_chat(int(chat_id))
+        fsub_type = "Request" if (fsub1 := await (getattr(db, f"get_fsub_mode{index}")())) and fsub1["mode"] == "req" else "Normal"
+
+        text += f"""➲ **Channel Number:** REQ_CHANNEL{index}
+➲ **ID:** `{chat.id}`
+➲ **Title:** {chat.title}
+➲ **Link:** {chat.invite_link or 'N/A'}
+➲ **Username:** { '@' + chat.username if chat.username else 'None'}
+➲ **Chat Type:** {"Public Channel" if chat.username else "Private Channel"}
+➲ **FSub Type:** {fsub_type}\n\n"""
+
+    await wait.edit(text=text, disable_web_page_preview=True)

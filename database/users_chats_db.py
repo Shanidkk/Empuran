@@ -11,8 +11,7 @@ class Database:
         self.db = self._client[database_name]
         self.col = self.db.users
         self.grp = self.db.group
-        self.req_one = self.db.reqone
-        self.req_two = self.db.reqtwo
+        self.req = self.db.requests
         self.fsub1 = self.db.fsub1
         self.fsub2 = self.db.fsub2
         self.chat_col = self.db.chatcol
@@ -150,70 +149,57 @@ class Database:
     async def get_db_size(self):
         return (await self.db.command("dbstats"))['dataSize']
 
-    async def add_req_one(self, user_id):
-        try:
-            await self.req_one.insert_one({"user_id": int(user_id)})
-            return
-        except Exception as e:
-            print(e)
-            pass
+    async def add_req(self, user_id, chat_id):
+        await self.req.update_one(
+            {"user_id": user_id},
+            {"$push": {"requests": {"chat_id": chat_id}}},
+            upsert=True
+        )
         
-    async def add_req_two(self, user_id):
-        try:
-            await self.req_two.insert_one({"id": int(user_id)})
-            return
-        except Exception as e:
-            print(e)
-            pass
-            
-    async def get_req_one(self, user_id):
-        return await self.req_one.find_one({"user_id": int(user_id)})
+    async def get_req(self, user_id, chat_id):
+        user = await self.req.find_one({"user_id": user_id})
+        if user:
+            return next((r for r in user["requests"] if r["chat_id"] == chat_id), None)
 
-    async def get_req_two(self, user_id):
-        return await self.req_two.find_one({"id": int(user_id)})
+    async def delete_req(self, user_id, chat_id):
+        await self.req.update_one(
+            {"user_id": user_id},
+            {"$pull": {"requests": {"chat_id": chat_id}}}
+        )
 
-    async def delete_all_one(self):
-        await self.req_one.delete_many({})
+    async def delete_all_reqs(self, chat_id=None):
+        if chat_id:
+            await self.req.update_many({}, {"$pull": {"requests": {"chat_id": chat_id}}})
+        else:
+            await self.req.delete_many({})
 
-    async def delete_all_two(self):
-        await self.req_two.delete_many({})
-
-    async def get_all_one_count(self): 
-        count = 0
-        async for req in self.req_one.find({}):
-            count += 1
-        return count
-
-    async def get_all_two_count(self): 
-        count = 0
-        async for req in self.req_two.find({}):
-            count += 1
-        return count
+    async def get_all_reqs_count(self, chat_id=None):
+        if chat_id:
+            return await self.req.count_documents({"requests.chat_id": chat_id})
+        return await self.req.count_documents({})
 
     async def get_loadout(self):
-        chat1 = await self.chat_col.find_one({})
-        if chat1:
-            chat1 = chat1['chat_id']
-        else:
-            chat1 = None
-        chat2 = await self.chat_col2.find_one({})
-        if chat2:
-            chat2 = chat2['chat_id']
-        else:
-            chat2 = None
-        data = { 
-               'channel1' : chat1,
-               'channel2' : chat2
+        chat1 = await self.chat_col.find_one({}) or {}
+        chat2 = await self.chat_col2.find_one({}) or {}
+
+        return {
+            "channel1": {
+                "id": chat1.get("chat_id"),
+                "link": chat1.get("invite_link"),
+            },
+            "channel2": {
+                "id": chat2.get("chat_id"),
+                "link": chat2.get("invite_link"),
+            }
         }
-        return data
-        
-    async def add_fsub_chat(self, chat_id):
+    
+    async def add_fsub_chat(self, chat_id, link):
         try:
             await self.chat_col.delete_many({})
-            await self.req_one.delete_many({})
+            await db.delete_all_reqs(chat_id)
             # Save the timestamp along with the chat_id
             switch_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            await self.chat_col.insert_one({"chat_id": chat_id, "switch_time": switch_time})
+            await self.chat_col.insert_one({"chat_id": chat_id, "invite_link": link, "switch_time": switch_time})
         except Exception as e:
             pass
             
@@ -222,14 +208,14 @@ class Database:
 
     async def delete_fsub_chat(self, chat_id):
         await self.chat_col.delete_one({"chat_id": chat_id})
-        await self.req_one.delete_many({})
+        await db.delete_all_reqs(chat_id)
 
-    async def add_fsub_chat2(self, chat_id):
+    async def add_fsub_chat2(self, chat_id, link):
         try:
             await self.chat_col2.delete_many({})
             await self.req_two.delete_many({})
             switch_time = datetime.now().strftime("%Y-%m-%d %H:%M")
-            await self.chat_col2.insert_one({"chat_id": chat_id, "switch_time": switch_time})
+            await self.chat_col2.insert_one({"chat_id": chat_id, "invite_link": link, "switch_time": switch_time})
         except Exception as e:
             pass
 
@@ -240,6 +226,28 @@ class Database:
         await self.chat_col2.delete_one({"chat_id": chat_id})
         await self.req_two.delete_many({})
 
+    async def update_fsub_link1(self, chat_id, new_link):
+        try:
+            result = await self.chat_col.update_one(
+                {"chat_id": chat_id},  # Find the document by chat_id
+                {"$set": {"invite_link": new_link}}  # Update the invite link
+            )
+            return result.modified_count > 0  # Return True if updated
+        except Exception as e:
+            print(f"Error updating invite link: {e}")
+            return False
+
+    async def update_fsub_link2(self, chat_id, new_link):
+        try:
+            result = await self.chat_col2.update_one(
+                {"chat_id": chat_id},  # Find the document by chat_id
+                {"$set": {"invite_link": new_link}}  # Update the invite link
+            )
+            return result.modified_count > 0  # Return True if updated
+        except Exception as e:
+            print(f"Error updating invite link: {e}")
+            return False
+        
     async def get_fsub_mode1(self):
         return await self.fsub1.find_one({})
 

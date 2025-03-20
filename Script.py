@@ -37,11 +37,13 @@ class script(object):
 
 /delchat2 - OFF 2
 
-/totalreq - Total Req in 2 Fsub Channels
+/get_fsub - Details of FSub chats
 
-/purge_one - Delete Requests (1st fsub)
+/total_req - Details of FSub chat requests
 
-/purge_two - Delete Requests (2nd fsub) 
+/purge - Reset requests dashboard
+
+/purge <chat_id> - Reset requests for a specific chat
 
 /stats - Check Stats
 

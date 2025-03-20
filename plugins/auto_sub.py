@@ -59,23 +59,23 @@ async def notify_admin_channel(bot, fsub_mode, next_channel, link):
     await bot.send_message(chat_id=LOG_CHANNEL, text=text)
 
 async def complete_switching1(chat, bot):
-    await db.add_fsub_chat(chat)
     try:
         link = (await bot.create_chat_invite_link(chat_id=int(chat), creates_join_request=temp.REQ_FSUB_MODE1)).invite_link
     except Exception as e:
         print(e)
         link = "None"
+    await db.add_fsub_chat(chat, link)
     bot.req_link1 = link
     temp.REQ_CHANNEL1 = chat
     await notify_admin_channel(bot, 1, chat, link)
 
 async def complete_switching2(chat, bot):
-    await db.add_fsub_chat2(chat)
     try:
         link = (await bot.create_chat_invite_link(chat_id=int(chat), creates_join_request=temp.REQ_FSUB_MODE2)).invite_link
     except Exception as e:
         print(e)
         link = "None"
+    await db.add_fsub_chat2(chat, link)
     bot.req_link2 = link
     temp.REQ_CHANNEL2 = chat
     await notify_admin_channel(bot, 2, chat, link)
@@ -112,26 +112,47 @@ async def join_reqs(b, join_req: ChatJoinRequest):
     chat_id = join_req.chat.id
     mode = 0
     request_limit = await get_request_limit()
+
     if chat_id == temp.REQ_CHANNEL1:
         mode = 1
-        if join_req.invite_link.creator.id == b.me.id:
-            await db.add_req_one(user_id)
-            await add_request(chat_id, user_id, request_collection_1)
-        total_requests = await get_total_requests(chat_id, request_collection_1)
-    
+        request_collection = request_collection_1
+        pending_collection = pending_collection_1
+        if user_id not in temp.ALERT_MESSAGES:
+            alert_msg = await b.send_message(
+                chat_id=user_id,
+                text="**⚠️ ഇനി Update Channel 2 ൽ കൂടെ ജോയിൻ ആയാൽ സിനിമ കിട്ടും.\n\n⚠️ You need to join my Update Channel 2 to get the file.**"
+            )
+            temp.ALERT_MESSAGES[user_id] = alert_msg.id  # Saves each chat's message
     elif chat_id == temp.REQ_CHANNEL2:
         mode = 2
-        if join_req.invite_link.creator.id == b.me.id:
-            await db.add_req_two(user_id)
-            await add_request(chat_id, user_id, request_collection_2)
-        total_requests = await get_total_requests(chat_id, request_collection_2)
+        request_collection = request_collection_2
+        pending_collection = pending_collection_2
+        if user_id not in temp.ALERT_MESSAGES:
+            alert_msg = await b.send_message(
+                chat_id=user_id,
+                text="**⚠️ ഇനി Update Channel 1 ൽ കൂടെ ജോയിൻ ആയാൽ സിനിമ കിട്ടും.\n\n⚠️ You need to join my Update Channel 1 to get the file.**"
+            )
+            temp.ALERT_MESSAGES[user_id] = alert_msg.id  # Saves each chat's message
+    else:
+        return  # Ignore requests from other chats
+
+    if join_req.invite_link.creator.id == b.me.id:
+        await db.add_req(user_id, chat_id)  # Fixed add_req call
+        await add_request(chat_id, user_id, request_collection)
+    
+    total_requests = await get_total_requests(chat_id, request_collection)
 
     if total_requests >= request_limit:
-        await b.send_message(chat_id=LOG_CHANNEL, text=f"<b>Your Force Sub Limit ({request_limit}) Has Been Completed Your chat {join_req.chat.title} Has Completed {request_limit}\nYou Can Sale it now!</b>")
-        if mode == 1:
-            await switch_channel(chat_id, mode, pending_collection_1, request_collection_1, b)
-        elif mode == 2:
-            await switch_channel(chat_id, mode, pending_collection_2, request_collection_2, b)
+        await b.send_message(
+            chat_id=LOG_CHANNEL,
+            text=(
+                f"<b>Your Force Sub Limit ({request_limit}) Has Been Completed."
+                f" Your chat {join_req.chat.title} has reached {request_limit} requests.\n"
+                "You can sell it now!</b>"
+            ),
+        )
+        await switch_channel(chat_id, mode, pending_collection, request_collection, b)
+
 
 @Client.on_message(filters.command('set_limit') & filters.user(ADMINS))
 async def set_request_limit_command(client, message):

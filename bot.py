@@ -17,7 +17,7 @@ from pyrogram.raw.all import layer
 from database.ia_filterdb import Media
 from database.users_chats_db import db
 from info import SESSION, API_ID, API_HASH, BOT_TOKEN, LOG_STR, LOG_CHANNEL
-from utils import temp, load_datas
+from utils import temp, load_fsub
 from typing import Union, Optional, AsyncGenerator
 from pyrogram import types
 from plugins.commands import restarti
@@ -47,6 +47,7 @@ class Bot(Client):
         self.restart_task = None  # Background task for scheduled restarts
 
     async def start(self, **kwargs):
+        await load_fsub(self)
         # Start the bot and set up a periodic restart
         await super().start()
         await self.setup_periodic_restart()
@@ -57,7 +58,6 @@ class Bot(Client):
         temp.BANNED_CHATS = b_chats
         await Media.ensure_indexes()
         me = await self.get_me()
-        await load_datas()
         temp.ME = me.id
         temp.U_NAME = me.username
         temp.B_NAME = me.first_name
@@ -65,41 +65,34 @@ class Bot(Client):
         logging.info(f"{me.first_name} with for Pyrogram v{__version__} (Layer {layer}) started on {me.username}.")
         logging.info(LOG_STR)
 
-        if temp.REQ_CHANNEL1:  
-            try:
-                _link = await self.create_chat_invite_link(chat_id=int(temp.REQ_CHANNEL1), creates_join_request=True)
-                self.req_link1 = _link.invite_link
-                print(f"Invite Link One set as {self.req_link1}")
-            except Exception as e:
-                logging.info(f"Make sure REQ_CHANNEL 1 ID is correct or {e}")
-
-        if temp.REQ_CHANNEL2:
-            try:
-                _link = await self.create_chat_invite_link(chat_id=int(temp.REQ_CHANNEL2), creates_join_request=True)
-                self.req_link2 = _link.invite_link
-                print(f"Invite Link Two set as {self.req_link2}")
-            except Exception as e:
-                logging.info(f"Make sure REQ_CHANNEL 2 ID is correct or {e}")
-
         fsub1 = await db.get_fsub_mode1()
-        if fsub1:
-            fsub1 = fsub1['mode']
-            if fsub1 == "req":
-                temp.REQ_FSUB_MODE1 = True
-            else:
-                temp.REQ_FSUB_MODE1 = False
-        else:
-            temp.REQ_FSUB_MODE1 = False
+        temp.REQ_FSUB_MODE1 = fsub1 and fsub1.get("mode") == "req"
 
         fsub2 = await db.get_fsub_mode2()
-        if fsub2:
-            fsub2 = fsub2['mode']
-            if fsub2 == "req":
-                temp.REQ_FSUB_MODE2 = True
-            else:
-                temp.REQ_FSUB_MODE2 = False
-        else:
-            temp.REQ_FSUB_MODE2 = False
+        temp.REQ_FSUB_MODE2 = fsub2 and fsub2.get("mode") == "req"
+
+        await self.export_chat_invite_link(temp.REQ_CHANNEL1)
+        await self.export_chat_invite_link(temp.REQ_CHANNEL2)
+
+        if not self.req_link1 and temp.REQ_CHANNEL1:
+            try:
+                self.req_link1 = (await self.create_chat_invite_link(
+                    int(temp.REQ_CHANNEL1), creates_join_request=temp.REQ_FSUB_MODE1
+                )).invite_link
+                await db.update_fsub_link1(temp.REQ_CHANNEL1, self.req_link1)
+                print(f"Invite Link One set as {self.req_link1}")
+            except Exception as e:
+                logging.info(f"Check REQ_CHANNEL1 ID: {e}")
+
+        if not self.req_link2 and temp.REQ_CHANNEL2:
+            try:
+                self.req_link2 = (await self.create_chat_invite_link(
+                    int(temp.REQ_CHANNEL2), creates_join_request=temp.REQ_FSUB_MODE2
+                )).invite_link
+                await db.update_fsub_link2(temp.REQ_CHANNEL2, self.req_link2)
+                print(f"Invite Link Two set as {self.req_link2}")
+            except Exception as e:
+                logging.info(f"Check REQ_CHANNEL2 ID: {e}")
             
         await self.send_message(chat_id=int(6446790411), text="restarted ❤️‍🩹")
 
@@ -145,6 +138,7 @@ class Bot(Client):
                 yield message
                 current += 1
 
-# Run the bot
-app = Bot()
-app.run()
+
+if __name__ == "__main__":
+    app = Bot()
+    app.run()

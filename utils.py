@@ -40,15 +40,27 @@ class temp(object):
     U_NAME = None
     B_NAME = None
     SETTINGS = {}
+    ALERT_MESSAGES = {}  # Stores chat_id -> message.id
     REQ_FSUB_MODE2 = None
     REQ_FSUB_MODE1 = None
     REQ_CHANNEL1 = None
     REQ_CHANNEL2 = None
 
-async def load_datas():
-    k = await db.get_loadout()
-    temp.REQ_CHANNEL1 = k['channel1']
-    temp.REQ_CHANNEL2 = k['channel2']
+async def load_fsub(self):
+    fsub_data = await db.get_loadout()
+    if not fsub_data or not fsub_data.get("channel1") or not fsub_data.get("channel2"):
+        print("⚠️ Warning: `get_loadout()` returned incomplete or empty data!")
+        return
+    
+    temp.REQ_CHANNEL1 = fsub_data["channel1"].get("id")
+    temp.REQ_CHANNEL2 = fsub_data["channel2"].get("id")
+
+    self.req_link1 = fsub_data["channel1"].get("link")
+    self.req_link2 = fsub_data["channel2"].get("link")
+
+    print(f"✅ Channel 1 ID: {temp.REQ_CHANNEL1}, Link: {self.req_link1}")
+    print(f"✅ Channel 2 ID: {temp.REQ_CHANNEL2}, Link: {self.req_link2}")
+
 
 async def check_loop_sub(client, message):
     count = 0
@@ -80,7 +92,7 @@ async def check_loop_sub2(client, message):
     return False
 
 async def is_requested_one(self , message):
-    user = (await db.get_req_one(int(message.from_user.id))) if temp.REQ_FSUB_MODE1 else None
+    user = (await db.get_req(int(message.from_user.id), int(temp.REQ_CHANNEL1))) if temp.REQ_FSUB_MODE1 else None
     if user:
         return True
     if message.from_user.id in ADMINS:
@@ -100,7 +112,7 @@ async def is_requested_one(self , message):
     return False
     
 async def is_requested_two(self, message):
-    user = (await db.get_req_two(int(message.from_user.id))) if temp.REQ_FSUB_MODE2 else None
+    user = (await db.get_req(int(message.from_user.id), int(temp.REQ_CHANNEL2))) if temp.REQ_FSUB_MODE2 else None
     if user:
         return True
     if message.from_user.id in ADMINS:
@@ -119,18 +131,6 @@ async def is_requested_two(self, message):
             pass
     return False
     
-async def is_subscribed(bot, query):
-    try:
-        user = await bot.get_chat_member(AUTH_CHANNEL, query.from_user.id)
-    except UserNotParticipant:
-        pass
-    except Exception as e:
-        logger.exception(e)
-    else:
-        if user.status != 'kicked':
-            return True
-
-    return False
  
 async def get_poster(query, bulk=False, id=False, file=None):
     if not id:
@@ -373,6 +373,64 @@ def split_quotes(text: str) -> List:
     if not key:
         key = text[0] + text[0]
     return list(filter(None, [key, rest]))
+
+
+def gfilterparser(text, keyword):
+    if "buttonalert" in text:
+        text = (text.replace("\n", "\\n").replace("\t", "\\t"))
+    buttons = []
+    note_data = ""
+    prev = 0
+    i = 0
+    alerts = []
+    for match in BTN_URL_REGEX.finditer(text):
+        # Check if btnurl is escaped
+        n_escapes = 0
+        to_check = match.start(1) - 1
+        while to_check > 0 and text[to_check] == "\\":
+            n_escapes += 1
+            to_check -= 1
+
+        # if even, not escaped -> create button
+        if n_escapes % 2 == 0:
+            note_data += text[prev:match.start(1)]
+            prev = match.end(1)
+            if match.group(3) == "buttonalert":
+                # create a thruple with button label, url, and newline status
+                if bool(match.group(5)) and buttons:
+                    buttons[-1].append(InlineKeyboardButton(
+                        text=match.group(2),
+                        callback_data=f"gfilteralert:{i}:{keyword}"
+                    ))
+                else:
+                    buttons.append([InlineKeyboardButton(
+                        text=match.group(2),
+                        callback_data=f"gfilteralert:{i}:{keyword}"
+                    )])
+                i += 1
+                alerts.append(match.group(4))
+            elif bool(match.group(5)) and buttons:
+                buttons[-1].append(InlineKeyboardButton(
+                    text=match.group(2),
+                    url=match.group(4).replace(" ", "")
+                ))
+            else:
+                buttons.append([InlineKeyboardButton(
+                    text=match.group(2),
+                    url=match.group(4).replace(" ", "")
+                )])
+
+        else:
+            note_data += text[prev:to_check]
+            prev = match.start(1) - 1
+    else:
+        note_data += text[prev:]
+
+    try:
+        return note_data, buttons, alerts
+    except:
+        return note_data, buttons, None
+
 
 def parser(text, keyword):
     if "buttonalert" in text:

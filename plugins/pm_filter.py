@@ -14,7 +14,7 @@ from info import ADMINS, AUTH_USERS, CUSTOM_FILE_CAPTION, AUTH_GROUPS, P_TTI_SHO
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
 from pyrogram import Client, filters, enums
 from pyrogram.errors import FloodWait, UserIsBlocked, MessageNotModified, PeerIdInvalid, QueryIdInvalid
-from utils import get_size, is_subscribed, get_poster, search_gagala, temp, get_settings, save_group_settings, is_requested_one, is_requested_two
+from utils import get_size, get_poster, search_gagala, temp, get_settings, save_group_settings, is_requested_one, is_requested_two
 from database.users_chats_db import db
 from database.ia_filterdb import Media, Mediaa, get_bad_files, get_file_details, get_search_results, db as clientDB, db1 as clientDB2, db2 as clientDB3
 from database.filters_mdb import (
@@ -444,6 +444,10 @@ async def cb_handler(client: Client, query: CallbackQuery):
                ]]
             )  
         )
+        user_id = query.from_user.id
+        if user_id in temp.ALERT_MESSAGES:
+            await client.delete_messages(user_id, temp.ALERT_MESSAGES[user_id])
+            del temp.ALERT_MESSAGES[user_id]
         if title and any(keyword in title.lower() for keyword in ['predvd', 'predvdrip']):
             f_caption += "\n⚠️<b><i>ഈ മൂവിയുടെ ഫയൽ എവിടെയെങ്കിലും ഫോർവേഡ് ചെയ്തു വെക്കുക എന്നിട്ട് ഡൗൺലോഡ് ചെയ്യുക\n\n3 മിനിറ്റിൽ ഇവിടുന്ന് ഡിലീറ്റ് ആവും🗑\n\n⚠️Forward the file of this Movie somewhere and download it\n\nWill be deleted from here in 3 minutes🗑</i></b>"
             inline_keyboard = [

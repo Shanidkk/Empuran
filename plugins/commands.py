@@ -12,7 +12,7 @@ from pyrogram.enums import ChatType
 from database.ia_filterdb import Media, Mediaa, get_file_details, unpack_new_file_id, delete_files_below_threshold
 from database.users_chats_db import db
 from info import CHANNELS, ADMINS, LOG_CHANNEL, PICS, BATCH_FILE_CAPTION, CUSTOM_FILE_CAPTION, PROTECT_CONTENT, DATABASE_URI, DATABASE_NAME
-from utils import get_settings, get_size, is_subscribed, is_requested_one, is_requested_two, save_group_settings, temp, check_loop_sub, check_loop_sub1, check_loop_sub2
+from utils import get_settings, get_size, is_requested_one, is_requested_two, save_group_settings, temp, check_loop_sub, check_loop_sub1, check_loop_sub2
 from database.connections_mdb import active_connection
 import re
 import json
@@ -182,6 +182,9 @@ async def start(client, message):
             check = await check_loop_sub1(client, message)
         if check:     
             await send_file(client, message, pre, file_id)
+            if message.from_user.id in temp.ALERT_MESSAGES:
+                await client.delete_messages(message.from_user.id, temp.ALERT_MESSAGES[message.from_user.id])
+                del temp.ALERT_MESSAGES[message.from_user.id]
             await sh.delete()        
             return
         else:
@@ -208,6 +211,9 @@ async def start(client, message):
         check = await check_loop_sub2(client, message)
         if check:
             await send_file(client, message, pre, file_id)
+            if message.from_user.id in temp.ALERT_MESSAGES:
+                await client.delete_messages(message.from_user.id, temp.ALERT_MESSAGES[message.from_user.id])
+                del temp.ALERT_MESSAGES[message.from_user.id]
             await sh.delete()     
             return 
         else:
@@ -381,6 +387,9 @@ async def start(client, message):
             InlineKeyboardButton('മൂവീസ് ഗ്രൂപ്പ് ', url='https://t.me/+A0B5zHQ2_wkxZjdl')
             ]])
     )
+    if message.from_user.id in temp.ALERT_MESSAGES:
+        await client.delete_messages(message.from_user.id, temp.ALERT_MESSAGES[message.from_user.id])
+        del temp.ALERT_MESSAGES[message.from_user.id]
     if title and any(keyword in title.lower() for keyword in ['predvd', 'predvdrip']):
         f_caption += "\n⚠️<b><i>ഈ മൂവിയുടെ ഫയൽ എവിടെയെങ്കിലും ഫോർവേഡ് ചെയ്തു വെക്കുക എന്നിട്ട് ഡൗൺലോഡ് ചെയ്യുക\n\n3 മിനിറ്റിൽ ഇവിടുന്ന് ഡിലീറ്റ് ആവും🗑\n\n⚠️Forward the file of this Movie somewhere and download it\n\nWill be deleted from here in 3 minutes🗑</i></b>"
         inline_keyboard = [
@@ -820,7 +829,6 @@ async def add_fsub_chats(bot: Client, update: Message):
         return
     else:
         chat = int(chat)
-    await db.add_fsub_chat(chat)
 
     text = f"Added chat <code>{chat}</code> to the database."
     
@@ -829,6 +837,7 @@ async def add_fsub_chats(bot: Client, update: Message):
     except Exception as e:
         print(e)
         link = "None"
+    await db.add_fsub_chat(chat, link)
     bot.req_link1 = link
     temp.REQ_CHANNEL1 = chat
     await update.reply_text(text=text, quote=True, parse_mode=enums.ParseMode.HTML)
@@ -860,7 +869,6 @@ async def add_fsub_chats2(bot: Client, update: Message):
         return
     else:
         chat = int(chat)
-    await db.add_fsub_chat2(chat)
 
     text = f"Added chat <code>{chat}</code> to the database."
     try:
@@ -868,6 +876,7 @@ async def add_fsub_chats2(bot: Client, update: Message):
     except Exception as e:
         print(e)
         link = "None"
+    await db.add_fsub_chat2(chat, link)
     bot.req_link2 = link
     temp.REQ_CHANNEL2 = chat
     await update.reply_text(text=text, quote=True, parse_mode=enums.ParseMode.HTML)
@@ -909,6 +918,7 @@ async def get_fsub_mode1(bot, update: Message):
     try:
         _link = await bot.create_chat_invite_link(chat_id=int(temp.REQ_CHANNEL1), creates_join_request=temp.REQ_FSUB_MODE1)
         bot.req_link1 = _link.invite_link
+        await db.update_fsub_link1(temp.REQ_CHANNEL1, _link.invite_link)
     except Exception as e:
         logging.info(f"Make Sure REQ_CHANNEL 1 ID is correct or {e}")
     await update.reply("Done ✅")
@@ -930,6 +940,7 @@ async def get_fsub_mode2(bot: Client, update: Message):
     try:
         _link = await bot.create_chat_invite_link(chat_id=int(temp.REQ_CHANNEL2), creates_join_request=temp.REQ_FSUB_MODE2)
         bot.req_link2 = _link.invite_link
+        await db.update_fsub_link2(temp.REQ_CHANNEL2, _link.invite_link)
     except Exception as e:
         logging.info(f"Make Sure REQ_CHANNEL 2 ID is correct or {e}")
     await update.reply("Done ✅")
