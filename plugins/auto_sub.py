@@ -27,7 +27,13 @@ async def add_request(chat_id: int, user_id: int, collection):
             {"$inc": {"total_requests": 1}},
             upsert=True
         )
-
+        
+async def get_total_requests_count(chat_id, coll):
+    if coll == 1: collection = pending_collection_1
+    else: collection = pending_collection_2
+    chat_data = await collection.find_one({"chat_id": chat_id})
+    return chat_data.get("total_requests", 0) if chat_data else 0
+    
 async def get_total_requests(chat_id: int, collection):
     chat_data = await collection.find_one({"chat_id": chat_id})
     return chat_data.get("total_requests", 0) if chat_data else 0
