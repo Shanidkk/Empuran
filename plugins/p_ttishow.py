@@ -8,7 +8,7 @@ from database.ia_filterdb import Media, Mediaa, db as clientDB, db1 as clientDB2
 from utils import get_size, temp, get_settings
 from Script import script
 from pyrogram.errors import ChatAdminRequired
-
+from .auto_sub import get_total_requests_count
 """-----------------------------------------https://t.me/GetTGLink/4179 --------------------------------------"""
 
 @Client.on_message(filters.new_chat_members & filters.group)
@@ -365,11 +365,9 @@ async def total_requests(bot, message):
         f"    • Joined : {stats['joined']} | • Left : {stats['left']}"
         for chat, chat_id, total, stats in channels
     )
-
     await wait.edit(text)
-
-    reqs_count_1 = await db.get_all_reqs_count(temp.REQ_CHANNEL1)
-    reqs_count_2 = await db.get_all_reqs_count(temp.REQ_CHANNEL2)
+    reqs_count_1 = await get_total_requests_count(chat_id=temp.REQ_CHANNEL1, coll=1)
+    reqs_count_2 = await get_total_requests_count(chat_id=temp.REQ_CHANNEL1, coll=2)
     channels = [
         (temp.REQ_CHANNEL1, reqs_count_1, await fsub_db.get_stats(int(temp.REQ_CHANNEL1))),
         (temp.REQ_CHANNEL2, reqs_count_2, await fsub_db.get_stats(int(temp.REQ_CHANNEL2))),
