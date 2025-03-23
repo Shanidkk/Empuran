@@ -15,7 +15,7 @@ def is_enabled(value, default):
 SESSION = environ.get('SESSION', 'MrBean')
 API_ID = int(environ.get("API_ID", "18674011"))
 API_HASH = environ.get("API_HASH", "38d3664512757d8830601169eff5a1de")
-BOT_TOKEN = environ.get("BOT_TOKEN", "8130309243:AAEnPAtJipLEhANbRAeif3Q9clKJkfxSNAc")
+BOT_TOKEN = environ.get("BOT_TOKEN", "7679200234:AAG5_6EotgtSKD6XX_geIJq2-tbayuToCXk")
 
 # Bot settings
 CACHE_TIME = int(environ.get('CACHE_TIME', 300))
