@@ -206,7 +206,7 @@ class Database:
     async def get_fsub_chat(self):
         return await self.chat_col.find_one({})
 
-    async def delete_fsub_chat(self, chat_id):
+    async def delete_fsub_chat(self):
         await self.chat_col.delete_many({})
         await db.delete_all_reqs(chat_id)
 
@@ -222,7 +222,7 @@ class Database:
     async def get_fsub_chat2(self):
         return await self.chat_col2.find_one({})
 
-    async def delete_fsub_chat2(self, chat_id):
+    async def delete_fsub_chat2(self):
         await self.chat_col2.delete_many({})
         await self.req_two.delete_many({})
 
