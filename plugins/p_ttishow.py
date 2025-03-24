@@ -349,20 +349,35 @@ async def total_requests(bot, message):
     user_id = message.from_user.id
     wait = await message.reply_text("Fetching Req Stats..", quote=True)
 
-    # Fetch channel data before iterating
     channels = []
+    
+    # Debugging: Print channel IDs before processing
+    print(f"REQ_CHANNEL1: {temp.REQ_CHANNEL1}, REQ_CHANNEL2: {temp.REQ_CHANNEL2}")
+
     for i, req_channel in enumerate([temp.REQ_CHANNEL1, temp.REQ_CHANNEL2], start=1):
         if req_channel:
-            reqs_count = await get_total_requests_count(chat_id=int(req_channel), coll=i)
-            stats = await fsub_db.get_stats(int(req_channel))
-            chat = await bot.get_chat(int(req_channel))
-            channels.append((chat, req_channel, reqs_count, stats))
+            try:
+                reqs_count = await get_total_requests_count(chat_id=int(req_channel), coll=i)
+                stats = await fsub_db.get_stats(int(req_channel))
+                chat = await bot.get_chat(int(req_channel))
+
+                # Debugging: Print fetched values
+                print(f"Processing Channel {i}: {chat.title} ({req_channel}) - Total Requests: {reqs_count}")
+
+                channels.append((chat, req_channel, reqs_count, stats))
+
+            except Exception as e:
+                print(f"Error processing channel {i}: {e}")
+
+    # If no channels found, send an error message
+    if not channels:
+        return await wait.edit("No request channels found or request count fetch failed!")
 
     # Build response text
     text = "\n\n".join(
         f"○ {chat.title} [{chat_id}]\n"
         f"    • Total {total} Requests\n"
-        f"    • Joined : {stats['joined']} | • Left : {stats['left']}"
+        f"    • Joined : {stats.get('joined', 0)} | • Left : {stats.get('left', 0)}"
         for chat, chat_id, total, stats in channels
     )
     
