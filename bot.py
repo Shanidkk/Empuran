@@ -71,8 +71,7 @@ class Bot(Client):
         fsub2 = await db.get_fsub_mode2()
         temp.REQ_FSUB_MODE2 = fsub2 and fsub2.get("mode") == "req"
 
-        await self.export_chat_invite_link(temp.REQ_CHANNEL1)
-        await self.export_chat_invite_link(temp.REQ_CHANNEL2)
+        
 
         if not self.req_link1 and temp.REQ_CHANNEL1:
             try:
