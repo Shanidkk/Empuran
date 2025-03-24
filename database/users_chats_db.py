@@ -12,6 +12,7 @@ class Database:
         self.col = self.db.users
         self.grp = self.db.group
         self.req = self.db.requests
+        self.req_two = self.db.requests2
         self.fsub1 = self.db.fsub1
         self.fsub2 = self.db.fsub2
         self.chat_col = self.db.chatcoltst
