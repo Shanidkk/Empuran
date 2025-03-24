@@ -8,7 +8,7 @@ import asyncio
 from datetime import datetime
 
 mongo_client = AsyncIOMotorClient(DATABASE_URI)
-db2 = mongo_client["AdminStorage"]
+db2 = mongo_client["Lalalaa"]
 
 request_collection_1 = db2["requests_channel_1"]
 request_collection_2 = db2["requests_channel_2"]
