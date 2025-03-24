@@ -346,26 +346,26 @@ async def execute_purge(bot, query):
 
 @Client.on_message(filters.command("total_req") & filters.user(ADMINS))
 async def total_requests(bot, message):
-user_id = message.from_user.id
-wait = await message.reply_text("Fetching Req Stats..", quote=True)
+    user_id = message.from_user.id
+    wait = await message.reply_text("Fetching Req Stats..", quote=True)
 
-# Fetch channel data before iterating  
-channels = []  
-for i, req_channel in enumerate([temp.REQ_CHANNEL1, temp.REQ_CHANNEL2], start=1):  
-    if req_channel:  
-        total_requests = await get_total_requests_count(chat_id=temp.REQ_CHANNEL1, coll=i)
-        stats = await fsub_db.get_stats(int(req_channel))  
-        chat = await bot.get_chat(int(req_channel))  
-        channels.append((chat, req_channel, total_requests, stats))  
+    # Fetch channel data before iterating  
+    channels = []  
+    for i, req_channel in enumerate([temp.REQ_CHANNEL1, temp.REQ_CHANNEL2], start=1):  
+        if req_channel:  
+            total_requests = await get_total_requests_count(chat_id=temp.REQ_CHANNEL1, coll=i)
+            stats = await fsub_db.get_stats(int(req_channel))  
+            chat = await bot.get_chat(int(req_channel))  
+            channels.append((chat, req_channel, total_requests, stats))  
 
-# Build response text  
-text = "\n\n".join(  
-    f"○ {chat.title} [{chat_id}]\n"  
-    f"    • Total {total} Requests\n"  
-    f"    • Joined : {stats['joined']} | • Left : {stats['left']}"  
-    for chat, chat_id, total, stats in channels  
-)  
-await wait.edit(text)
+     # Build response text  
+    text = "\n\n".join(  
+        f"○ {chat.title} [{chat_id}]\n"  
+        f"    • Total {total} Requests\n"  
+        f"    • Joined : {stats['joined']} | • Left : {stats['left']}"  
+        for chat, chat_id, total, stats in channels  
+    )  
+    await wait.edit(text)
 
 
 @Client.on_message(filters.command("get_fsub") & filters.user(ADMINS))
