@@ -14,7 +14,7 @@ class Database:
         self.req = self.db.requests
         self.fsub1 = self.db.fsub1
         self.fsub2 = self.db.fsub2
-        self.chat_col2 = self.db.chatcoltst
+        self.chat_col = self.db.chatcoltst
         self.chat_col2 = self.db.chatcol2tst
 
 
