@@ -1,7 +1,9 @@
 import logging
 from pyrogram import Client, filters, enums
 from pyrogram.types import Message
-from config import ADMINS, temp, db
+from config import ADMINS
+from utils import temp
+from database.fsub_db import db
 
 logging.basicConfig(level=logging.INFO)
 
