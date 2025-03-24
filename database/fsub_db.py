@@ -5,20 +5,24 @@ from info import DATABASE_NAME, DATABASE_URI
 
 logging.basicConfig(level=logging.INFO)
 
-
 class Database:
     def __init__(self, uri: str, db_name: str):
         self.client = AsyncIOMotorClient(uri)
         self.db = self.client[db_name]
 
-        # Collections for storing fsub chats
+        # Collections
         self.fsub_chat1 = self.db["fsub_chat1"]
         self.fsub_chat2 = self.db["fsub_chat2"]
+        self.req = self.db["user_requests"]  # Collection for storing user requests
+
+    # ================================
+    # ✅ FSUB CHAT MANAGEMENT FUNCTIONS
+    # ================================
 
     async def add_fsub_chat1(self, chat_id: int, invite_link: str) -> bool:
         """Add or update fsub chat 1 details."""
         try:
-            await self.fsub_chat1.delete_many({})  # Remove existing entry
+            await self.fsub_chat1.delete_many({})
             switch_time = datetime.now().strftime("%Y-%m-%d %H:%M")
             await self.fsub_chat1.insert_one({
                 "chat_id": chat_id,
@@ -33,7 +37,7 @@ class Database:
     async def add_fsub_chat2(self, chat_id: int, invite_link: str) -> bool:
         """Add or update fsub chat 2 details."""
         try:
-            await self.fsub_chat2.delete_many({})  # Remove existing entry
+            await self.fsub_chat2.delete_many({})
             switch_time = datetime.now().strftime("%Y-%m-%d %H:%M")
             await self.fsub_chat2.insert_one({
                 "chat_id": chat_id,
@@ -112,6 +116,68 @@ class Database:
                 "switch_time": chat2.get("switch_time")
             }
         }
+
+    # ================================
+    # ✅ USER REQUEST MANAGEMENT FUNCTIONS
+    # ================================
+
+    async def add_req(self, user_id: int, chat_id: int) -> bool:
+        """Add a request entry for a user."""
+        try:
+            await self.req.update_one(
+                {"user_id": user_id},
+                {"$push": {"requests": {"chat_id": chat_id}}},
+                upsert=True
+            )
+            return True
+        except Exception as e:
+            logging.error(f"Error adding request for user {user_id}: {e}")
+            return False
+
+    async def get_req(self, user_id: int, chat_id: int) -> dict | None:
+        """Retrieve a specific request made by a user for a chat."""
+        try:
+            user = await self.req.find_one({"user_id": user_id})
+            if user:
+                return next((r for r in user["requests"] if r["chat_id"] == chat_id), None)
+            return None
+        except Exception as e:
+            logging.error(f"Error retrieving request for user {user_id}: {e}")
+            return None
+
+    async def delete_req(self, user_id: int, chat_id: int) -> bool:
+        """Delete a specific request from a user for a chat."""
+        try:
+            result = await self.req.update_one(
+                {"user_id": user_id},
+                {"$pull": {"requests": {"chat_id": chat_id}}}
+            )
+            return result.modified_count > 0
+        except Exception as e:
+            logging.error(f"Error deleting request for user {user_id}: {e}")
+            return False
+
+    async def delete_all_reqs(self, chat_id: int = None) -> bool:
+        """Delete all requests for a specific chat or all requests globally."""
+        try:
+            if chat_id:
+                await self.req.update_many({}, {"$pull": {"requests": {"chat_id": chat_id}}})
+            else:
+                await self.req.delete_many({})
+            return True
+        except Exception as e:
+            logging.error(f"Error deleting requests: {e}")
+            return False
+
+    async def get_all_reqs_count(self, chat_id: int = None) -> int:
+        """Get the count of all requests for a specific chat or globally."""
+        try:
+            if chat_id:
+                return await self.req.count_documents({"requests.chat_id": chat_id})
+            return await self.req.count_documents({})
+        except Exception as e:
+            logging.error(f"Error counting requests: {e}")
+            return 0
 
 
 # Initialize Database
