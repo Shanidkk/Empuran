@@ -14,8 +14,8 @@ class Database:
         self.req = self.db.requests
         self.fsub1 = self.db.fsub1
         self.fsub2 = self.db.fsub2
-        self.chat_col = self.db.chatcol
-        self.chat_col2 = self.db.chatcol2
+        self.fsub_col = self.db.chatcol
+        self.fsub_col2 = self.db.chatcol2
 
 
     def new_user(self, id, name):
