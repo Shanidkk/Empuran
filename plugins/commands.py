@@ -845,7 +845,7 @@ async def add_fsub_chats(bot: Client, update: Message):
 @Client.on_message(filters.command("delchat1") & filters.user(ADMINS))
 async def clear_fsub_chats(bot: Client, update: Message):
     await update.react("👍")
-    await db.delete_fsub_chat(chat_id=(await db.get_fsub_chat())['chat_id'])
+    await db.delete_fsub_chat()
     await update.reply_text(text="Deleted fsub chat from the database.", quote=True)
     temp.REQ_CHANNEL1 = None
     bot.req_link1 = None
@@ -886,7 +886,7 @@ async def add_fsub_chats2(bot: Client, update: Message):
 @Client.on_message(filters.command("delchat2") & filters.user(ADMINS))
 async def clear_fsub_chats2(bot, update: Message):
     await update.react("👍")
-    await db.delete_fsub_chat2(chat_id=(await db.get_fsub_chat2())['chat_id'])
+    await db.delete_fsub_chat2()
     await update.reply_text(text="Deleted fsub chat from the database.", quote=True)
     temp.REQ_CHANNEL2 = None
     bot.req_link2 = None
