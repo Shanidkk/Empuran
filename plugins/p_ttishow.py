@@ -353,10 +353,10 @@ async def total_requests(bot, message):
     channels = []
     for i, req_channel in enumerate([temp.REQ_CHANNEL1, temp.REQ_CHANNEL2], start=1):
         if req_channel:
-            total_requests = await db.get_all_reqs_count(int(req_channel))
+            reqs_count = await get_total_requests_count(chat_id=int(req_channel), coll=i)
             stats = await fsub_db.get_stats(int(req_channel))
             chat = await bot.get_chat(int(req_channel))
-            channels.append((chat, req_channel, total_requests, stats))
+            channels.append((chat, req_channel, reqs_count, stats))
 
     # Build response text
     text = "\n\n".join(
@@ -365,13 +365,9 @@ async def total_requests(bot, message):
         f"    • Joined : {stats['joined']} | • Left : {stats['left']}"
         for chat, chat_id, total, stats in channels
     )
+    
     await wait.edit(text)
-    reqs_count_1 = await get_total_requests_count(chat_id=temp.REQ_CHANNEL1, coll=1)
-    reqs_count_2 = await get_total_requests_count(chat_id=temp.REQ_CHANNEL1, coll=2)
-    channels = [
-        (temp.REQ_CHANNEL1, reqs_count_1, await fsub_db.get_stats(int(temp.REQ_CHANNEL1))),
-        (temp.REQ_CHANNEL2, reqs_count_2, await fsub_db.get_stats(int(temp.REQ_CHANNEL2))),
-    ]
+
 
 @Client.on_message(filters.command("get_fsub") & filters.user(ADMINS))
 async def channel_info(bot, message):
