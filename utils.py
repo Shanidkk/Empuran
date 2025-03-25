@@ -49,19 +49,22 @@ class temp(object):
     REQ_CHANNEL2 = None
 
 async def load_fsub(self):
-    fsub_data = await db.get_loadout()
-    if not fsub_data or not fsub_data.get("channel1") or not fsub_data.get("channel2"):
-        print("⚠️ Warning: `get_loadout()` returned incomplete or empty data!")
+    """Load and set fsub chat details from the database into temporary variables."""
+    fsub_data = await db.get_all_fsub_chats()
+
+    if not fsub_data or not fsub_data.get("fsub_chat1") or not fsub_data.get("fsub_chat2"):
+        logging.warning("⚠️ Warning: `get_all_fsub_chats()` returned incomplete or empty data!")
         return
-    
-    temp.REQ_CHANNEL1 = fsub_data["channel1"].get("id")
-    temp.REQ_CHANNEL2 = fsub_data["channel2"].get("id")
+    # Extract and set fsub chat 1 details
+    temp.REQ_CHANNEL1 = fsub_data["fsub_chat1"].get("chat_id")
+    self.req_link1 = fsub_data["fsub_chat1"].get("invite_link")
+    # Extract and set fsub chat 2 details
+    temp.REQ_CHANNEL2 = fsub_data["fsub_chat2"].get("chat_id")
+    self.req_link2 = fsub_data["fsub_chat2"].get("invite_link")
 
-    self.req_link1 = fsub_data["channel1"].get("link")
-    self.req_link2 = fsub_data["channel2"].get("link")
-
-    print(f"✅ Channel 1 ID: {temp.REQ_CHANNEL1}, Link: {self.req_link1}")
-    print(f"✅ Channel 2 ID: {temp.REQ_CHANNEL2}, Link: {self.req_link2}")
+    # Logging loaded data for debugging
+    logging.info(f"✅ Channel 1 ID: {temp.REQ_CHANNEL1}, Link: {self.req_link1}")
+    logging.info(f"✅ Channel 2 ID: {temp.REQ_CHANNEL2}, Link: {self.req_link2}")
 
 
 async def check_loop_sub(client, message):
