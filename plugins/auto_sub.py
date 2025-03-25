@@ -65,27 +65,42 @@ async def notify_admin_channel(bot, fsub_mode, next_channel, link):
     await bot.send_message(chat_id=LOG_CHANNEL, text=text)
 
 async def complete_switching1(chat, bot):
+    """Switch and update fsub chat 1 details in the database."""
     try:
-        link = (await bot.create_chat_invite_link(chat_id=int(chat), creates_join_request=temp.REQ_FSUB_MODE1)).invite_link
+        link = (await bot.create_chat_invite_link(
+            chat_id=int(chat), 
+            creates_join_request=temp.REQ_FSUB_MODE1
+        )).invite_link
     except Exception as e:
-        print(e)
+        logging.error(f"Error creating invite link for chat {chat}: {e}")
         link = "None"
-    await db.add_fsub_chat(chat, link)
+    # Store the updated chat details in the database
+    await db.add_fsub_chat1(chat, link)
+    # Update bot and temp variables
     bot.req_link1 = link
     temp.REQ_CHANNEL1 = chat
+    # Notify admin about the update
     await notify_admin_channel(bot, 1, chat, link)
 
+
 async def complete_switching2(chat, bot):
+    """Switch and update fsub chat 2 details in the database."""
     try:
-        link = (await bot.create_chat_invite_link(chat_id=int(chat), creates_join_request=temp.REQ_FSUB_MODE2)).invite_link
+        link = (await bot.create_chat_invite_link(
+            chat_id=int(chat), 
+            creates_join_request=temp.REQ_FSUB_MODE2
+        )).invite_link
     except Exception as e:
-        print(e)
+        logging.error(f"Error creating invite link for chat {chat}: {e}")
         link = "None"
+    # Store the updated chat details in the database
     await db.add_fsub_chat2(chat, link)
+    # Update bot and temp variables
     bot.req_link2 = link
     temp.REQ_CHANNEL2 = chat
+    # Notify admin about the update
     await notify_admin_channel(bot, 2, chat, link)
-
+    
 
 async def switch_channel(chat_id, fsub_mode, pending_collection, collection, bot):
     if fsub_mode == 0:
