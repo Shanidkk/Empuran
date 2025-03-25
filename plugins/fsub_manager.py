@@ -4,6 +4,7 @@ from pyrogram.types import Message
 from info import ADMINS
 from utils import temp
 from database.fsub_db import db
+from pyrogram.types import Message, InlineKeyboardButton, InlineKeyboardMarkup
 
 logging.basicConfig(level=logging.INFO)
 
