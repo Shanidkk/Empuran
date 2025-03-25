@@ -27,8 +27,10 @@ async def add_request(chat_id: int, user_id: int, collection):
         )
         
 async def get_total_requests_count(chat_id, coll):
-    if coll == 1: collection = pending_collection_1
-    else: collection = pending_collection_2
+    if coll == 1:
+        collection = request_collection_1  # Corrected Collection
+    else:
+        collection = request_collection_2  # Corrected Collection
     chat_data = await collection.find_one({"chat_id": chat_id})
     return chat_data.get("total_requests", 0) if chat_data else 0
     
@@ -158,9 +160,7 @@ async def join_reqs(b, join_req: ChatJoinRequest):
     if join_req.invite_link.creator.id == b.me.id:
         await db.add_req(user_id, chat_id)  # Fixed add_req call
         await add_request(chat_id, user_id, request_collection)
-    
-    total_requests = await get_total_requests(chat_id, request_collection)
-
+    total_requests = await get_total_requests_count(chat_id, mode)  # Fixing request counting
     if total_requests >= request_limit:
         await switch_channel(chat_id, mode, pending_collection, request_collection, b)
 
