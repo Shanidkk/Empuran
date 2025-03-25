@@ -27,6 +27,8 @@ import logging
 from plugins.commands import incol
 from .auto_sub import remove_channel_2, remove_channel_1, show_channel_details_2, show_channel_details_1
 from .auto_flst import get_autofilter_status
+from .fsub_manager import execute_purge
+
 
 logger = logging.getLogger(__name__)
 # Disable logging completely
@@ -170,6 +172,8 @@ async def advantage_spoll_choker(bot, query):
 async def cb_handler(client: Client, query: CallbackQuery):
     if query.data == "close_data":
         await query.message.delete()
+    elif query.data.startswith("confirm_purge_"):
+        await execute_purge(client, query)
     elif query.data.startswith("show_channel_1"):
         await show_channel_details_1(client, query)
     elif query.data.startswith("show_channel_2"):
