@@ -108,8 +108,10 @@ async def switch_channel(chat_id, fsub_mode, pending_collection, collection, bot
         next_channel = await get_next_pending_channel(pending_collection)
         if next_channel:
             await remove_pending_channel(next_channel, pending_collection)
-            # Reset requests for the current channel before switching
-            await collection.update_one({"chat_id": chat_id}, {"$set": {"total_requests": 0}})
+            
+            # Clear all user requests from the current channel before switching
+            await collection.delete_many({"chat_id": chat_id})  # Clears user IDs
+
             switch_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             await collection.update_one(
                 {"chat_id": next_channel},
