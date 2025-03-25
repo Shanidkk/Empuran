@@ -219,7 +219,12 @@ async def execute_purge(bot, query):
         await db.delete_all_reqs()
         msg = f"✅ **All Requests Cleared!**"
     
-    await query.message.edit_text(msg)
+    try:
+        await query.message.edit_text(msg)
+    except Exception:
+        await query.message.reply_text(msg, quote=True)
+    
+    await query.answer("Purge Completed!", show_alert=True)
 
 
 @Client.on_message(filters.command("total_req") & filters.user(ADMINS))
