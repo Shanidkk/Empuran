@@ -50,7 +50,6 @@ class Bot(Client):
         await load_fsub(self)
         # Start the bot and set up a periodic restart
         await super().start()
-        await self.setup_periodic_restart()
         
         # Load banned users and chats, set up other startup configurations
         b_users, b_chats = await db.get_banned()
@@ -70,9 +69,7 @@ class Bot(Client):
 
         fsub2 = await db.get_fsub_mode2()
         temp.REQ_FSUB_MODE2 = fsub2 and fsub2.get("mode") == "req"
-
         
-
         if not self.req_link1 and temp.REQ_CHANNEL1:
             try:
                 self.req_link1 = (await self.create_chat_invite_link(
