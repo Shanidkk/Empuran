@@ -4,6 +4,7 @@ from pyrogram.types import Message
 from info import ADMINS
 from utils import temp
 from database.fsub_db import db
+from database.join_leave_db import db as lvdb 
 from pyrogram.types import Message, InlineKeyboardButton, InlineKeyboardMarkup
 
 logging.basicConfig(level=logging.INFO)
@@ -229,7 +230,6 @@ async def execute_purge(bot, query):
 @Client.on_message(filters.command("total_req") & filters.user(ADMINS))
 async def total_requests(bot, message):
     """Fetch total request statistics from all subscribed channels."""
-    user_id = message.from_user.id
     wait = await message.reply_text("Fetching Request Stats...", quote=True)
 
     channels = []
@@ -237,20 +237,28 @@ async def total_requests(bot, message):
         if req_channel:
             total_requests = await db.get_all_reqs_count(chat_id=int(req_channel))
             chat = await bot.get_chat(int(req_channel))
-            channels.append((chat, req_channel, total_requests))
-
+            # Fetch FSUB mode
+            fsub_mode_data = await db.get_fsub_mode1() if i == 1 else await db.get_fsub_mode2()
+            fsub_mode = fsub_mode_data["mode"] if fsub_mode_data else "Unknown"
+            # Get Join Count (If Normal Mode) or Request Count
+            if fsub_mode == "normal":
+                joined_count = await lvdb.get_stats(int(req_channel))  # How many joined
+                count_text = f"✅ **Joined Users:** {joined_count}"
+            else:
+                count_text = f"📌 **Total Requests:** {total_requests}"
+            channels.append((chat, req_channel, fsub_mode, count_text))
     if not channels:
         return await wait.edit("❌ No request channels found!")
 
     # Build response text
     text = "\n\n".join(
         f"○ **{chat.title}** [`{chat_id}`]\n"
-        f"    • **Total Requests:** {total}"
-        for chat, chat_id, total in channels
+        f"    • **FSUB Mode:** `{fsub_mode}`\n"
+        f"    • {count_text}"
+        for chat, chat_id, fsub_mode, count_text in channels
     )
 
     await wait.edit(text)
-
 
 @Client.on_message(filters.command("get_fsub") & filters.user(ADMINS))
 async def channel_info(bot, message):
