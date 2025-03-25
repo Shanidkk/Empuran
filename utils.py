@@ -14,6 +14,8 @@ from database.users_chats_db import db
 from bs4 import BeautifulSoup
 import requests
 import asyncio
+from database.fsub_db import db as fsub_db 
+
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -91,47 +93,67 @@ async def check_loop_sub2(client, message):
         await asyncio.sleep(1)
     return False
 
-async def is_requested_one(self , message):
-    user = (await db.get_req(int(message.from_user.id), int(temp.REQ_CHANNEL1))) if temp.REQ_FSUB_MODE1 else None
-    if user:
-        return True
-    if message.from_user.id in ADMINS:
-        return True
-    try:
-        user = await self.get_chat_member(int(temp.REQ_CHANNEL1), message.from_user.id)
-    except UserNotParticipant:
-        pass
-    except Exception as e:
-        logger.exception(e)
-        pass
-    else:
-        if not (user.status == enums.ChatMemberStatus.BANNED):
+async def is_requested_one(self, message):
+    """Check if a user has requested access or is part of the required channel."""
+    user_id = message.from_user.id
+    chat_id = temp.REQ_CHANNEL1
+
+    if not chat_id:
+        return True  # If no channel is set, bypass checks
+
+    # Check if the user has made a request
+    if temp.REQ_FSUB_MODE1:
+        user = await fsub_db.get_req(user_id, chat_id)
+        if user:
             return True
-        else:
-            pass
+
+    # Admins bypass the restriction
+    if user_id in ADMINS:
+        return True
+
+    # Check if the user is a participant in the channel
+    try:
+        member = await self.get_chat_member(chat_id, user_id)
+        if member.status != enums.ChatMemberStatus.BANNED:
+            return True
+    except UserNotParticipant:
+        return False
+    except Exception as e:
+        logger.exception(f"Error checking user status in chat {chat_id}: {e}")
+
     return False
-    
+
+
 async def is_requested_two(self, message):
-    user = (await db.get_req(int(message.from_user.id), int(temp.REQ_CHANNEL2))) if temp.REQ_FSUB_MODE2 else None
-    if user:
-        return True
-    if message.from_user.id in ADMINS:
-        return True
-    try:
-        user = await self.get_chat_member(int(temp.REQ_CHANNEL2), message.from_user.id)
-    except UserNotParticipant:
-        pass
-    except Exception as e:
-        logger.exception(e)
-        pass
-    else:
-        if not (user.status == enums.ChatMemberStatus.BANNED):
+    """Check if a user has requested access or is part of the second required channel."""
+    user_id = message.from_user.id
+    chat_id = temp.REQ_CHANNEL2
+
+    if not chat_id:
+        return True  # If no channel is set, bypass checks
+
+    # Check if the user has made a request
+    if temp.REQ_FSUB_MODE2:
+        user = await fsub_db.get_req(user_id, chat_id)
+        if user:
             return True
-        else:
-            pass
+
+    # Admins bypass the restriction
+    if user_id in ADMINS:
+        return True
+
+    # Check if the user is a participant in the channel
+    try:
+        member = await self.get_chat_member(chat_id, user_id)
+        if member.status != enums.ChatMemberStatus.BANNED:
+            return True
+    except UserNotParticipant:
+        return False
+    except Exception as e:
+        logger.exception(f"Error checking user status in chat {chat_id}: {e}")
+
     return False
     
- 
 async def get_poster(query, bulk=False, id=False, file=None):
     if not id:
         # https://t.me/GetTGLink/4183
