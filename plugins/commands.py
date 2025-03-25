@@ -186,6 +186,8 @@ async def start(client, message):
             if message.from_user.id in temp.ALERT_MESSAGES:
                 await client.delete_messages(message.from_user.id, temp.ALERT_MESSAGES[message.from_user.id])
                 del temp.ALERT_MESSAGES[message.from_user.id]
+                if should_run_check_loop_sub:
+                    del temp.DOUBLE_MSGS[message.from_user.id]
             await sh.delete()        
             return
         else:
