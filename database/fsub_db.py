@@ -19,7 +19,7 @@ class Database:
     # ✅ FSUB CHAT MANAGEMENT FUNCTIONS
     # ================================
 
-    async def add_fsub_chat1(self, chat_id: int, invite_link: str, mode: str = "normal") -> bool:
+    async def add_fsub_chat1(self, chat_id: int, invite_link: str, mode: str = "req") -> bool:
         """Add or update fsub chat 1 details with mode."""
         try:
             await self.fsub_chat1.delete_many({})
