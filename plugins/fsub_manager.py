@@ -165,67 +165,6 @@ async def toggle_fsub_mode2(bot: Client, message: Message):
 
     await message.reply_text(f"✅ **Fsub Chat 2 Mode Updated:** `{new_mode}`", quote=True)
     
-@Client.on_message(filters.command('purge') & filters.private & filters.user(ADMINS))
-async def purge_requests(bot, message):
-    args = message.command[1:]
-    if args:  # Purge by chat ID
-        return await confirm_purge(bot, message, f"chat_{args[0]}", f"Chat ID: {args[0]}")
-
-    buttons = [
-        [
-            InlineKeyboardButton("🗑 Purge One", callback_data=f"purge_chat_{temp.REQ_CHANNEL1}"),
-            InlineKeyboardButton("🗑 Purge Two", callback_data=f"purge_chat_{temp.REQ_CHANNEL2}"),
-        ],
-        [
-            InlineKeyboardButton("🚨 Purge All", callback_data="purge_all"),
-            InlineKeyboardButton("❌ Cancel", callback_data="purge_cancel"),
-        ]
-    ]
-    await message.reply_text(
-        "⚠️ **Select data to purge. This cannot be undone!**",
-        quote=True,
-        reply_markup=InlineKeyboardMarkup(buttons),
-    )
-
-async def confirm_purge(bot, message, action, label):
-    buttons = [
-        [
-            InlineKeyboardButton("✅ Yes", callback_data=f"confirm_{action}"),
-            InlineKeyboardButton("❌ No", callback_data="purge_cancel"),
-        ]
-    ]
-    try:
-        await message.edit_text(
-            f"⚠️ **Confirm purge: {label}?**",
-            reply_markup=InlineKeyboardMarkup(buttons)
-        )
-    except Exception:
-        await message.reply_text(
-            f"⚠️ **Confirm purge: {label}?**",
-            quote=True,
-            reply_markup=InlineKeyboardMarkup(buttons)
-        )
-
-
-async def execute_purge(bot, query):
-    """Handles purge confirmation for all requests or specific chat requests."""
-    action = query.data.split("_", 1)[1]
-    
-    if action.startswith("chat"):
-        chat_id = int(action.split("_")[1])
-        await db.delete_all_reqs(chat_id)
-        msg = f"✅ **Chat ID {chat_id} Cleared!**"
-    else:
-        await db.delete_all_reqs()
-        msg = f"✅ **All Requests Cleared!**"
-    
-    try:
-        await query.message.edit_text(msg)
-    except Exception:
-        await query.message.reply_text(msg, quote=True)
-    
-    await query.answer("Purge Completed!", show_alert=True)
-
 
 @Client.on_message(filters.command("total_req") & filters.user(ADMINS))
 async def total_requests(bot, message):
