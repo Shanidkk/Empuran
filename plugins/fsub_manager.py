@@ -206,7 +206,6 @@ async def confirm_purge(bot, message, action, label):
         )
 
 
-@Client.on_callback_query(filters.regex(r"^confirm_(all|chat_.+)$"))
 async def execute_purge(bot, query):
     """Handles purge confirmation for all requests or specific chat requests."""
     action = query.data.split("_", 1)[1]
