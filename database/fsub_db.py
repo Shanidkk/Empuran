@@ -13,6 +13,7 @@ class Database:
         # Collections
         self.fsub_chat1 = self.db["fsub_chat1"]
         self.fsub_chat2 = self.db["fsub_chat2"]
+        self.fsub_mode = self.db["fsubmodes"]
         self.req = self.db["user_requests"]  # Collection for storing user requests
 
     # ================================
@@ -189,18 +190,18 @@ class Database:
 
     async def get_fsub_mode1(self) -> dict | None:
         """Retrieve the global FSub mode for chat 1."""
-        mode_data = await self.fsub_chat1.find_one({"setting": "fsub_mode1"})
+        mode_data = await self.fsub_mode.find_one({"setting": "fsub_mode1"})
         return {"mode": mode_data.get("mode", "req")} if mode_data else {"mode": "req"}
 
     async def get_fsub_mode2(self) -> dict | None:
         """Retrieve the global FSub mode for chat 2."""
-        mode_data = await self.fsub_chat2.find_one({"setting": "fsub_mode2"})
+        mode_data = await self.fsub_mode.find_one({"setting": "fsub_mode2"})
         return {"mode": mode_data.get("mode", "req")} if mode_data else {"mode": "req"}
 
     async def add_fsub_mode1(self, mode: str) -> bool:
         """Update the global FSub mode for chat 1."""
         try:
-            result = await self.fsub_chat1.update_one(
+            result = await self.fsub_mode.update_one(
                 {"setting": "fsub_mode1"},
                 {"$set": {"mode": mode}},
                 upsert=True
@@ -213,7 +214,7 @@ class Database:
     async def add_fsub_mode2(self, mode: str) -> bool:
         """Update the global FSub mode for chat 2."""
         try:
-            result = await self.fsub_chat2.update_one(
+            result = await self.fsub_mode.update_one(
                 {"setting": "fsub_mode2"},
                 {"$set": {"mode": mode}},
                 upsert=True
