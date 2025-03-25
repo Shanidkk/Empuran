@@ -126,6 +126,10 @@ async def toggle_fsub_mode1(bot: Client, message: Message):
     temp.REQ_FSUB_MODE1 = fsub_mode["mode"] == "normal"
 
     new_mode = "req" if temp.REQ_FSUB_MODE1 else "normal"
+    new_link = (await self.create_chat_invite_link(
+        int(temp.REQ_CHANNEL1), creates_join_request=temp.REQ_FSUB_MODE1
+    )).invite_link
+    bot.req_link1 = new_link
     await db.add_fsub_mode1(new_mode)
 
     await message.reply_text(f"✅ **Fsub Mode 1 Updated:** `{new_mode}`", quote=True)
@@ -136,7 +140,10 @@ async def toggle_fsub_mode2(bot: Client, message: Message):
     """Toggle the global join request mode for Fsub Chat 2."""
     fsub_mode = await db.get_fsub_mode2()
     temp.REQ_FSUB_MODE2 = fsub_mode["mode"] == "normal"
-
+    new_link = (await self.create_chat_invite_link(
+        int(temp.REQ_CHANNEL2), creates_join_request=temp.REQ_FSUB_MODE2
+    )).invite_link
+    bot.req_link2 = new_link
     new_mode = "req" if temp.REQ_FSUB_MODE2 else "normal"
     await db.add_fsub_mode2(new_mode)
 
