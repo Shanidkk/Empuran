@@ -188,39 +188,39 @@ class Database:
     # ================================
 
     async def get_fsub_mode1(self) -> dict | None:
-        """Retrieve the FSub mode for chat 1."""
-        chat = await self.get_fsub_chat1()
-        return {"mode": chat.get("mode", "req")} if chat else None
+        """Retrieve the global FSub mode for chat 1."""
+        mode_data = await self.fsub_chat1.find_one({"setting": "fsub_mode1"})
+        return {"mode": mode_data.get("mode", "req")} if mode_data else {"mode": "req"}
 
     async def get_fsub_mode2(self) -> dict | None:
-        """Retrieve the FSub mode for chat 2."""
-        chat = await self.get_fsub_chat2()
-        return {"mode": chat.get("mode", "req")} if chat else None
+        """Retrieve the global FSub mode for chat 2."""
+        mode_data = await self.fsub_chat2.find_one({"setting": "fsub_mode2"})
+       return {"mode": mode_data.get("mode", "req")} if mode_data else {"mode": "req"}
 
-    async def add_fsub_mode1(self, chat_id: int, mode: str) -> bool:
-        """Update the FSub mode for chat 1."""
+    async def add_fsub_mode1(self, mode: str) -> bool:
+        """Update the global FSub mode for chat 1."""
         try:
             result = await self.fsub_chat1.update_one(
-                {"chat_id": chat_id},
+                {"setting": "fsub_mode1"},
                 {"$set": {"mode": mode}},
                 upsert=True
             )
             return result.modified_count > 0
         except Exception as e:
-            logging.error(f"Error updating fsub mode for chat 1: {e}")
+            logging.error(f"Error updating global fsub mode for chat 1: {e}")
             return False
 
-    async def add_fsub_mode2(self, chat_id: int, mode: str) -> bool:
-        """Update the FSub mode for chat 2."""
+    async def add_fsub_mode2(self, mode: str) -> bool:
+        """Update the global FSub mode for chat 2."""
         try:
             result = await self.fsub_chat2.update_one(
-                {"chat_id": chat_id},
+                {"setting": "fsub_mode2"},
                 {"$set": {"mode": mode}},
                 upsert=True
             )
             return result.modified_count > 0
         except Exception as e:
-            logging.error(f"Error updating fsub mode for chat 2: {e}")
+            logging.error(f"Error updating global fsub mode for chat 2: {e}")
             return False
 
 
