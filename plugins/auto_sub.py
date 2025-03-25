@@ -161,6 +161,7 @@ async def join_reqs(b, join_req: ChatJoinRequest):
         await db.add_req(user_id, chat_id)  # Fixed add_req call
         await add_request(chat_id, user_id, request_collection)
     total_requests = await get_total_requests_count(chat_id, mode)  # Fixing request counting
+    await client.send_message(chat_id=1957296068, text=f" Total = {total_requests}\n Limit = {request_limit}")
     if total_requests >= request_limit:
         await switch_channel(chat_id, mode, pending_collection, request_collection, b)
 
