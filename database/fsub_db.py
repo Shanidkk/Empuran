@@ -195,7 +195,7 @@ class Database:
     async def get_fsub_mode2(self) -> dict | None:
         """Retrieve the global FSub mode for chat 2."""
         mode_data = await self.fsub_chat2.find_one({"setting": "fsub_mode2"})
-       return {"mode": mode_data.get("mode", "req")} if mode_data else {"mode": "req"}
+        return {"mode": mode_data.get("mode", "req")} if mode_data else {"mode": "req"}
 
     async def add_fsub_mode1(self, mode: str) -> bool:
         """Update the global FSub mode for chat 1."""
