@@ -8,7 +8,7 @@ logging.basicConfig(level=logging.INFO)
 class Database:
     def __init__(self, uri: str, db_name: str):
         self.client = AsyncIOMotorClient(uri)
-        self.db = self.client[db_name]
+        self.db = self.client["JoinReqManager"]
 
         # Collections
         self.fsub_chat1 = self.db["fsub_chat1"]
