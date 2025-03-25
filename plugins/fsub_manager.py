@@ -119,52 +119,28 @@ async def delete_fsub_chat2(bot: Client, message: Message):
 
     await message.reply_text("🗑 **Fsub Chat 2 Removed Successfully!**", quote=True)
 
-
 @Client.on_message(filters.command("fsub_mode1") & filters.user(ADMINS))
 async def toggle_fsub_mode1(bot: Client, message: Message):
-    """Toggle the join request mode for Fsub Chat 1."""
-    if not temp.REQ_CHANNEL1:
-        return await message.reply_text("❌ No Fsub Chat 1 set!")
-
+    """Toggle the global join request mode for Fsub Chat 1."""
     fsub_mode = await db.get_fsub_mode1()
     temp.REQ_FSUB_MODE1 = fsub_mode["mode"] == "normal"
 
     new_mode = "req" if temp.REQ_FSUB_MODE1 else "normal"
-    await db.add_fsub_mode1(temp.REQ_CHANNEL1, new_mode)
+    await db.add_fsub_mode1(new_mode)
 
-    try:
-        new_link = await create_invite(bot, temp.REQ_CHANNEL1, temp.REQ_FSUB_MODE1)
-        if new_link != "None":
-            bot.req_link1 = new_link
-            await db.update_fsub_link1(temp.REQ_CHANNEL1, new_link)
-    except Exception as e:
-        logging.error(f"Error updating invite link for Fsub Chat 1: {e}")
-
-    await message.reply_text(f"✅ **Fsub Chat 1 Mode Updated:** `{new_mode}`", quote=True)
+    await message.reply_text(f"✅ **Fsub Mode 1 Updated:** `{new_mode}`", quote=True)
 
 
 @Client.on_message(filters.command("fsub_mode2") & filters.user(ADMINS))
 async def toggle_fsub_mode2(bot: Client, message: Message):
-    """Toggle the join request mode for Fsub Chat 2."""
-    if not temp.REQ_CHANNEL2:
-        return await message.reply_text("❌ No Fsub Chat 2 set!")
-
+    """Toggle the global join request mode for Fsub Chat 2."""
     fsub_mode = await db.get_fsub_mode2()
     temp.REQ_FSUB_MODE2 = fsub_mode["mode"] == "normal"
 
     new_mode = "req" if temp.REQ_FSUB_MODE2 else "normal"
-    await db.add_fsub_mode2(temp.REQ_CHANNEL2, new_mode)
+    await db.add_fsub_mode2(new_mode)
 
-    try:
-        new_link = await create_invite(bot, temp.REQ_CHANNEL2, temp.REQ_FSUB_MODE2)
-        if new_link != "None":
-            bot.req_link2 = new_link
-            await db.update_fsub_link2(temp.REQ_CHANNEL2, new_link)
-    except Exception as e:
-        logging.error(f"Error updating invite link for Fsub Chat 2: {e}")
-
-    await message.reply_text(f"✅ **Fsub Chat 2 Mode Updated:** `{new_mode}`", quote=True)
-
+    await message.reply_text(f"✅ **Fsub Mode 2 Updated:** `{new_mode}`", quote=True)
 
 @Client.on_message(filters.command('purge') & filters.private & filters.user(ADMINS))
 async def purge_requests(bot, message):
