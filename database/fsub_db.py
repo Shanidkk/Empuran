@@ -59,6 +59,24 @@ class Database:
         """Retrieve fsub chat 2 details, including mode."""
         return await self.fsub_chat2.find_one({})
 
+    async def delete_fsub_chat1(self) -> bool:
+        """Delete fsub chat 1 data."""
+        try:
+            result = await self.fsub_chat1.delete_many({})
+            return result.deleted_count > 0
+        except Exception as e:
+            logging.error(f"Error deleting fsub chat 1: {e}")
+            return False
+
+    async def delete_fsub_chat2(self) -> bool:
+        """Delete fsub chat 2 data."""
+        try:
+            result = await self.fsub_chat2.delete_many({})
+            return result.deleted_count > 0
+        except Exception as e:
+            logging.error(f"Error deleting fsub chat 2: {e}")
+            return False
+            
     async def update_fsub_link1(self, chat_id: int, new_link: str) -> bool:
         """Update the invite link for fsub chat 1."""
         try:
