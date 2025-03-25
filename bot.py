@@ -66,8 +66,8 @@ class Bot(Client):
         logging.info(LOG_STR)
 
         fsub_data = await fsub_db.get_all_fsub_chats()
-        temp.REQ_FSUB_MODE1 = fsub_data["fsub_chat1"].get("mode") == "req"
-        temp.REQ_FSUB_MODE2 = fsub_data["fsub_chat2"].get("mode") == "req"
+        temp.REQ_FSUB_MODE1 = fsub_data["fsub_chat1"].get("mode", "req") == "req"
+        temp.REQ_FSUB_MODE2 = fsub_data["fsub_chat2"].get("mode", "req") == "req"
         if not self.req_link1 and temp.REQ_CHANNEL1:
             try:
                 self.req_link1 = (await self.create_chat_invite_link(
