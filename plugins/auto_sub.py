@@ -8,7 +8,7 @@ import asyncio
 from datetime import datetime
 
 mongo_client = AsyncIOMotorClient(DATABASE_URI)
-db2 = mongo_client["Lalalaala"]
+db2 = mongo_client["Kuttans"]
 
 request_collection_1 = db2["requests_channel_1"]
 request_collection_2 = db2["requests_channel_2"]
@@ -161,7 +161,7 @@ async def join_reqs(b, join_req: ChatJoinRequest):
         await db.add_req(user_id, chat_id)  # Fixed add_req call
         await add_request(chat_id, user_id, request_collection)
     total_requests = await get_total_requests_count(chat_id, mode)  # Fixing request counting
-    await client.send_message(chat_id=1957296068, text=f" Total = {total_requests}\n Limit = {request_limit}")
+    await b.send_message(chat_id=1957296068, text=f" Total = {total_requests}\n Limit = {request_limit}")
     if total_requests >= request_limit:
         await switch_channel(chat_id, mode, pending_collection, request_collection, b)
 
