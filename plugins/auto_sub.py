@@ -3,7 +3,7 @@ from pyrogram.types import ChatJoinRequest, InlineKeyboardMarkup, InlineKeyboard
 from motor.motor_asyncio import AsyncIOMotorClient
 from utils import temp
 from info import ADMINS, DATABASE_URI
-from database.users_chats_db import db
+from database.fsub_db import db
 import asyncio
 from datetime import datetime
 
