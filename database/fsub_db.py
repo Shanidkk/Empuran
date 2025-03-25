@@ -19,30 +19,32 @@ class Database:
     # ✅ FSUB CHAT MANAGEMENT FUNCTIONS
     # ================================
 
-    async def add_fsub_chat1(self, chat_id: int, invite_link: str) -> bool:
-        """Add or update fsub chat 1 details."""
+    async def add_fsub_chat1(self, chat_id: int, invite_link: str, mode: str = "normal") -> bool:
+        """Add or update fsub chat 1 details with mode."""
         try:
             await self.fsub_chat1.delete_many({})
             switch_time = datetime.now().strftime("%Y-%m-%d %H:%M")
             await self.fsub_chat1.insert_one({
                 "chat_id": chat_id,
                 "invite_link": invite_link,
-                "switch_time": switch_time
+                "switch_time": switch_time,
+                "mode": mode  # NEW: Store mode
             })
             return True
         except Exception as e:
             logging.error(f"Error adding fsub chat 1: {e}")
             return False
 
-    async def add_fsub_chat2(self, chat_id: int, invite_link: str) -> bool:
-        """Add or update fsub chat 2 details."""
+    async def add_fsub_chat2(self, chat_id: int, invite_link: str, mode: str = "normal") -> bool:
+        """Add or update fsub chat 2 details with mode."""
         try:
             await self.fsub_chat2.delete_many({})
             switch_time = datetime.now().strftime("%Y-%m-%d %H:%M")
             await self.fsub_chat2.insert_one({
                 "chat_id": chat_id,
                 "invite_link": invite_link,
-                "switch_time": switch_time
+                "switch_time": switch_time,
+                "mode": mode  # NEW: Store mode
             })
             return True
         except Exception as e:
@@ -50,11 +52,11 @@ class Database:
             return False
 
     async def get_fsub_chat1(self) -> dict | None:
-        """Retrieve fsub chat 1 details."""
+        """Retrieve fsub chat 1 details, including mode."""
         return await self.fsub_chat1.find_one({})
 
     async def get_fsub_chat2(self) -> dict | None:
-        """Retrieve fsub chat 2 details."""
+        """Retrieve fsub chat 2 details, including mode."""
         return await self.fsub_chat2.find_one({})
 
     async def update_fsub_link1(self, chat_id: int, new_link: str) -> bool:
@@ -81,26 +83,8 @@ class Database:
             logging.error(f"Error updating invite link for chat 2: {e}")
             return False
 
-    async def delete_fsub_chat1(self) -> bool:
-        """Delete all data from fsub chat 1."""
-        try:
-            await self.fsub_chat1.delete_many({})
-            return True
-        except Exception as e:
-            logging.error(f"Error deleting fsub chat 1: {e}")
-            return False
-
-    async def delete_fsub_chat2(self) -> bool:
-        """Delete all data from fsub chat 2."""
-        try:
-            await self.fsub_chat2.delete_many({})
-            return True
-        except Exception as e:
-            logging.error(f"Error deleting fsub chat 2: {e}")
-            return False
-
     async def get_all_fsub_chats(self) -> dict:
-        """Retrieve both fsub chats in a structured format."""
+        """Retrieve both fsub chats in a structured format, including mode."""
         chat1 = await self.get_fsub_chat1() or {}
         chat2 = await self.get_fsub_chat2() or {}
 
@@ -108,12 +92,14 @@ class Database:
             "fsub_chat1": {
                 "chat_id": chat1.get("chat_id"),
                 "invite_link": chat1.get("invite_link"),
-                "switch_time": chat1.get("switch_time")
+                "switch_time": chat1.get("switch_time"),
+                "mode": chat1.get("mode", "normal")  # NEW: Include mode
             },
             "fsub_chat2": {
                 "chat_id": chat2.get("chat_id"),
                 "invite_link": chat2.get("invite_link"),
-                "switch_time": chat2.get("switch_time")
+                "switch_time": chat2.get("switch_time"),
+                "mode": chat2.get("mode", "normal")  # NEW: Include mode
             }
         }
 
@@ -178,6 +164,46 @@ class Database:
         except Exception as e:
             logging.error(f"Error counting requests: {e}")
             return 0
+
+    # ================================
+    # ✅ NEW: FSUB MODE MANAGEMENT FUNCTIONS
+    # ================================
+
+    async def get_fsub_mode1(self) -> dict | None:
+        """Retrieve the FSub mode for chat 1."""
+        chat = await self.get_fsub_chat1()
+        return {"mode": chat.get("mode", "normal")} if chat else None
+
+    async def get_fsub_mode2(self) -> dict | None:
+        """Retrieve the FSub mode for chat 2."""
+        chat = await self.get_fsub_chat2()
+        return {"mode": chat.get("mode", "normal")} if chat else None
+
+    async def add_fsub_mode1(self, chat_id: int, mode: str) -> bool:
+        """Update the FSub mode for chat 1."""
+        try:
+            result = await self.fsub_chat1.update_one(
+                {"chat_id": chat_id},
+                {"$set": {"mode": mode}},
+                upsert=True
+            )
+            return result.modified_count > 0
+        except Exception as e:
+            logging.error(f"Error updating fsub mode for chat 1: {e}")
+            return False
+
+    async def add_fsub_mode2(self, chat_id: int, mode: str) -> bool:
+        """Update the FSub mode for chat 2."""
+        try:
+            result = await self.fsub_chat2.update_one(
+                {"chat_id": chat_id},
+                {"$set": {"mode": mode}},
+                upsert=True
+            )
+            return result.modified_count > 0
+        except Exception as e:
+            logging.error(f"Error updating fsub mode for chat 2: {e}")
+            return False
 
 
 # Initialize Database
