@@ -16,6 +16,7 @@ from pyrogram import Client, __version__
 from pyrogram.raw.all import layer
 from database.ia_filterdb import Media
 from database.users_chats_db import db
+from database.fsub_db import db as fsub_db
 from info import SESSION, API_ID, API_HASH, BOT_TOKEN, LOG_STR, LOG_CHANNEL
 from utils import temp, load_fsub
 from typing import Union, Optional, AsyncGenerator
@@ -64,10 +65,10 @@ class Bot(Client):
         logging.info(f"{me.first_name} with for Pyrogram v{__version__} (Layer {layer}) started on {me.username}.")
         logging.info(LOG_STR)
 
-        fsub1 = await db.get_fsub_mode1()
+        fsub1 = await fsub_db.get_fsub_mode1()
         temp.REQ_FSUB_MODE1 = fsub1 and fsub1.get("mode") == "req"
 
-        fsub2 = await db.get_fsub_mode2()
+        fsub2 = await fsub_db.get_fsub_mode2()
         temp.REQ_FSUB_MODE2 = fsub2 and fsub2.get("mode") == "req"
         
         if not self.req_link1 and temp.REQ_CHANNEL1:
@@ -75,7 +76,7 @@ class Bot(Client):
                 self.req_link1 = (await self.create_chat_invite_link(
                     int(temp.REQ_CHANNEL1), creates_join_request=temp.REQ_FSUB_MODE1
                 )).invite_link
-                await db.update_fsub_link1(temp.REQ_CHANNEL1, self.req_link1)
+                await fsub_db.update_fsub_link1(temp.REQ_CHANNEL1, self.req_link1)
                 print(f"Invite Link One set as {self.req_link1}")
             except Exception as e:
                 logging.info(f"Check REQ_CHANNEL1 ID: {e}")
@@ -85,7 +86,7 @@ class Bot(Client):
                 self.req_link2 = (await self.create_chat_invite_link(
                     int(temp.REQ_CHANNEL2), creates_join_request=temp.REQ_FSUB_MODE2
                 )).invite_link
-                await db.update_fsub_link2(temp.REQ_CHANNEL2, self.req_link2)
+                await fsub_db.update_fsub_link2(temp.REQ_CHANNEL2, self.req_link2)
                 print(f"Invite Link Two set as {self.req_link2}")
             except Exception as e:
                 logging.info(f"Check REQ_CHANNEL2 ID: {e}")
