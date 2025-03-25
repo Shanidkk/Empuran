@@ -16,8 +16,6 @@ pending_collection_1 = db2["pending_channels_1"]
 pending_collection_2 = db2["pending_channels_2"]
 settings_collection = db2["channel_settings"]
 
-LOG_CHANNEL = int(-1002354358178)
-
 async def add_request(chat_id: int, user_id: int, collection):
     existing_request = await collection.find_one({"chat_id": chat_id, "user_id": user_id})
     if not existing_request:
@@ -164,18 +162,6 @@ async def join_reqs(b, join_req: ChatJoinRequest):
     total_requests = await get_total_requests(chat_id, request_collection)
 
     if total_requests >= request_limit:
-        for id in ADMINS:
-            try:
-                await b.send_message(
-                    chat_id=int(id),
-                    text=(
-                        f"<b>Your Force Sub Limit ({request_limit}) Has Been Completed."
-                        f" Your chat {join_req.chat.title} has reached {request_limit} requests.\n"
-                        "You can sell it now!</b>"
-                    ),
-            except:
-                pass
-            )
         await switch_channel(chat_id, mode, pending_collection, request_collection, b)
 
 
