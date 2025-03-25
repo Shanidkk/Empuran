@@ -65,11 +65,9 @@ class Bot(Client):
         logging.info(f"{me.first_name} with for Pyrogram v{__version__} (Layer {layer}) started on {me.username}.")
         logging.info(LOG_STR)
 
-        fsub1 = await fsub_db.get_fsub_mode1()
-        temp.REQ_FSUB_MODE1 = fsub1 and fsub1.get("mode") == "req"
-
-        fsub2 = await fsub_db.get_fsub_mode2()
-        temp.REQ_FSUB_MODE2 = fsub2 and fsub2.get("mode") == "req"
+        fsub_data = await db.get_all_fsub_chats()
+        temp.REQ_FSUB_MODE1 = fsub_data["fsub_chat1"].get("mode") == "req"
+        temp.REQ_FSUB_MODE2 = fsub_data["fsub_chat2"].get("mode") == "req"
         if not self.req_link1 and temp.REQ_CHANNEL1:
             try:
                 self.req_link1 = (await self.create_chat_invite_link(
