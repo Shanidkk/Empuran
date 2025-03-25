@@ -164,7 +164,88 @@ async def toggle_fsub_mode2(bot: Client, message: Message):
         logging.error(f"Error updating invite link for Fsub Chat 2: {e}")
 
     await message.reply_text(f"✅ **Fsub Chat 2 Mode Updated:** `{new_mode}`", quote=True)
+
+
+@Client.on_message(filters.command('purge') & filters.private & filters.user(ADMINS))
+async def purge_requests(bot, message):
+    """Ask the admin which data to purge."""
+    args = message.command[1:]
+    if args:  # Purge by specific chat ID
+        return await confirm_purge(bot, message, f"chat_{args[0]}", f"Chat ID: {args[0]}")
+
+    buttons = [
+        [
+            InlineKeyboardButton("🗑 Purge One", callback_data=f"purge_chat_{temp.REQ_CHANNEL1}"),
+            InlineKeyboardButton("🗑 Purge Two", callback_data=f"purge_chat_{temp.REQ_CHANNEL2}"),
+        ],
+        [
+            InlineKeyboardButton("🚨 Purge All", callback_data="purge_all"),
+            InlineKeyboardButton("❌ Cancel", callback_data="purge_cancel"),
+        ]
+    ]
+    await message.reply_text(
+        "⚠️ **Select data to purge. This cannot be undone!**",
+        quote=True,
+        reply_markup=InlineKeyboardMarkup(buttons),
+    )
+
+
+async def confirm_purge(bot, message, action, label):
+    """Ask for confirmation before purging data."""
+    buttons = [
+        [
+            InlineKeyboardButton("✅ Yes", callback_data=f"confirm_{action}"),
+            InlineKeyboardButton("❌ No", callback_data="purge_cancel"),
+        ]
+    ]
+    try:
+        await message.edit_text(
+            f"⚠️ **Confirm purge: {label}?**",
+            reply_markup=InlineKeyboardMarkup(buttons)
+        )
+    except Exception:
+        await message.reply_text(
+            f"⚠️ **Confirm purge: {label}?**",
+            quote=True,
+            reply_markup=InlineKeyboardMarkup(buttons)
+        )
+
+
+@Client.on_callback_query(filters.regex("^confirm_(all|chat_.+)$"))
+async def execute_purge(client, query):
+    """Handles purge confirmation for all requests or specific chat requests."""
+    action = query.data.split("_", 1)[1]
     
+    if action.startswith("chat"):
+        chat_id = int(action.split("_")[1])
+        await db.delete_all_reqs(chat_id)
+        msg = f"✅ **Chat ID {chat_id} Cleared!**"
+    else:
+        await db.delete_all_reqs()
+        msg = f"✅ **All Requests Cleared!**"
+    
+    try:
+        await query.message.edit_text(msg)
+    except Exception:
+        await query.message.reply_text(msg, quote=True)
+    
+    await query.answer("Purge Completed!", show_alert=True)
+
+
+@Client.on_callback_query(filters.regex("^purge_(chat_.+|all|cancel)$"))
+async def cb_handler(client: Client, query):
+    """Handles callback queries for purge actions."""
+    data = query.data
+
+    if data == "purge_cancel":
+        await query.message.delete()
+    elif data.startswith("purge_chat_"):
+        chat_id = data.split("_")[-1]
+        await confirm_purge(client, query.message, f"chat_{chat_id}", f"Chat ID: {chat_id}")
+    elif data == "purge_all":
+        await confirm_purge(client, query.message, "all", "All Requests")
+    
+    await query.answer()
 
 @Client.on_message(filters.command("total_req") & filters.user(ADMINS))
 async def total_requests(bot, message):
@@ -182,7 +263,7 @@ async def total_requests(bot, message):
             # Get Join Count (If Normal Mode) or Request Count
             if fsub_mode == "normal":
                 joined_count = await lvdb.get_stats(int(req_channel))  # How many joined
-                count_text = f"✅ **Joined Users:** {joined_count}"
+                count_text = f"✅ **Joined Users:** {joined_count['joined']}"
             else:
                 count_text = f"📌 **Total Requests:** {total_requests}"
             channels.append((chat, req_channel, fsub_mode, count_text))
