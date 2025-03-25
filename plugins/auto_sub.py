@@ -165,13 +165,16 @@ async def join_reqs(b, join_req: ChatJoinRequest):
 
     if total_requests >= request_limit:
         for id in ADMINS:
-            await b.send_message(
-                chat_id=int(id),
-                text=(
-                    f"<b>Your Force Sub Limit ({request_limit}) Has Been Completed."
-                    f" Your chat {join_req.chat.title} has reached {request_limit} requests.\n"
-                    "You can sell it now!</b>"
-                ),
+            try:
+                await b.send_message(
+                    chat_id=int(id),
+                    text=(
+                        f"<b>Your Force Sub Limit ({request_limit}) Has Been Completed."
+                        f" Your chat {join_req.chat.title} has reached {request_limit} requests.\n"
+                        "You can sell it now!</b>"
+                    ),
+            except:
+                pass
             )
         await switch_channel(chat_id, mode, pending_collection, request_collection, b)
 
