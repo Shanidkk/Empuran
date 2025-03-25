@@ -226,3 +226,4 @@ class Database:
 
 # Initialize Database
 db = Database(DATABASE_URI, DATABASE_NAME)
+                
