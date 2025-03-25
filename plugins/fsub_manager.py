@@ -126,7 +126,7 @@ async def toggle_fsub_mode1(bot: Client, message: Message):
     temp.REQ_FSUB_MODE1 = fsub_mode["mode"] == "normal"
 
     new_mode = "req" if temp.REQ_FSUB_MODE1 else "normal"
-    new_link = (await self.create_chat_invite_link(
+    new_link = (await bot.create_chat_invite_link(
         int(temp.REQ_CHANNEL1), creates_join_request=temp.REQ_FSUB_MODE1
     )).invite_link
     bot.req_link1 = new_link
@@ -143,7 +143,7 @@ async def toggle_fsub_mode2(bot: Client, message: Message):
     
     new_mode = "req" if temp.REQ_FSUB_MODE2 else "normal"
     await db.add_fsub_mode2(new_mode)
-    new_link = (await self.create_chat_invite_link(
+    new_link = (await bot.create_chat_invite_link(
         int(temp.REQ_CHANNEL2), creates_join_request=temp.REQ_FSUB_MODE2
     )).invite_link
     bot.req_link2 = new_link
