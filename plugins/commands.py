@@ -177,6 +177,7 @@ async def start(client, message):
             parse_mode=enums.ParseMode.MARKDOWN
             )
         if should_run_check_loop_sub:
+            temp.DOUBLE_MSGS[message.from_user.id] = True
             check = await check_loop_sub(client, message)
         elif should_run_check_loop_sub1:
             check = await check_loop_sub1(client, message)
