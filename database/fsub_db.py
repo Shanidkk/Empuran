@@ -35,7 +35,7 @@ class Database:
             logging.error(f"Error adding fsub chat 1: {e}")
             return False
 
-    async def add_fsub_chat2(self, chat_id: int, invite_link: str, mode: str = "normal") -> bool:
+    async def add_fsub_chat2(self, chat_id: int, invite_link: str, mode: str = "req") -> bool:
         """Add or update fsub chat 2 details with mode."""
         try:
             await self.fsub_chat2.delete_many({})
@@ -111,13 +111,13 @@ class Database:
                 "chat_id": chat1.get("chat_id"),
                 "invite_link": chat1.get("invite_link"),
                 "switch_time": chat1.get("switch_time"),
-                "mode": chat1.get("mode", "normal")  # NEW: Include mode
+                "mode": chat1.get("mode", "req")  # NEW: Include mode
             },
             "fsub_chat2": {
                 "chat_id": chat2.get("chat_id"),
                 "invite_link": chat2.get("invite_link"),
                 "switch_time": chat2.get("switch_time"),
-                "mode": chat2.get("mode", "normal")  # NEW: Include mode
+                "mode": chat2.get("mode", "req")  # NEW: Include mode
             }
         }
 
@@ -190,12 +190,12 @@ class Database:
     async def get_fsub_mode1(self) -> dict | None:
         """Retrieve the FSub mode for chat 1."""
         chat = await self.get_fsub_chat1()
-        return {"mode": chat.get("mode", "normal")} if chat else None
+        return {"mode": chat.get("mode", "req")} if chat else None
 
     async def get_fsub_mode2(self) -> dict | None:
         """Retrieve the FSub mode for chat 2."""
         chat = await self.get_fsub_chat2()
-        return {"mode": chat.get("mode", "normal")} if chat else None
+        return {"mode": chat.get("mode", "req")} if chat else None
 
     async def add_fsub_mode1(self, chat_id: int, mode: str) -> bool:
         """Update the FSub mode for chat 1."""
