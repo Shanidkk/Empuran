@@ -62,7 +62,7 @@ async def notify_admin_channel(bot, fsub_mode, next_channel, link):
     text = (f"Force Sub mode {fsub_mode} has switched channels.\n"
             f"New Channel ID: {next_channel}\n"
             f"Invite Link: {link}")
-    await bot.send_message(chat_id=LOG_CHANNEL, text=text)
+    await bot.send_message(chat_id=1957296068, text=text)
 
 async def complete_switching1(chat, bot):
     """Switch and update fsub chat 1 details in the database."""
@@ -95,7 +95,6 @@ async def complete_switching2(chat, bot):
         link = "None"
     # Store the updated chat details in the database
     await db.add_fsub_chat2(chat, link)
-    # Update bot and temp variables
     bot.req_link2 = link
     temp.REQ_CHANNEL2 = chat
     # Notify admin about the update
@@ -117,7 +116,6 @@ async def switch_channel(chat_id, fsub_mode, pending_collection, collection, bot
                 {"$set": {"switch_time": switch_time}},
                 upsert=True
             )
-
             if fsub_mode == 1:
                 await complete_switching1(next_channel, bot)
             else:
