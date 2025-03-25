@@ -42,6 +42,7 @@ class temp(object):
     U_NAME = None
     B_NAME = None
     SETTINGS = {}
+    DOUBLE_MSGS = {}
     ALERT_MESSAGES = {}  # Stores chat_id -> message.id
     REQ_FSUB_MODE2 = None
     REQ_FSUB_MODE1 = None
