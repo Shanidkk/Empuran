@@ -38,7 +38,7 @@ async def set_fsub_chat1(bot: Client, message: Message):
     await message.reply_text(text, quote=True, parse_mode=enums.ParseMode.HTML)
 
     invite_link = await create_invite(bot, chat_id, temp.REQ_FSUB_MODE1)
-    mode = await db.get_fsub_mode1()
+    mode = (await db.get_fsub_mode1())["mode"]
     await db.add_fsub_chat1(chat_id, invite_link, mode)
 
     bot.req_link1 = invite_link
@@ -98,7 +98,7 @@ async def set_fsub_chat2(bot: Client, message: Message):
     await message.reply_text(text, quote=True, parse_mode=enums.ParseMode.HTML)
 
     invite_link = await create_invite(bot, chat_id, temp.REQ_FSUB_MODE2)
-    mode = await db.get_fsub_mode2()
+    mode = (await db.get_fsub_mode2())["mode"]
     await db.add_fsub_chat2(chat_id, invite_link, mode)
 
     bot.req_link2 = invite_link
