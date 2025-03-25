@@ -50,7 +50,7 @@ class temp(object):
 
 async def load_fsub(self):
     """Load and set fsub chat details from the database into temporary variables."""
-    fsub_data = await db.get_all_fsub_chats()
+    fsub_data = await fsub_db.get_all_fsub_chats()
 
     if not fsub_data or not fsub_data.get("fsub_chat1") or not fsub_data.get("fsub_chat2"):
         logging.warning("⚠️ Warning: `get_all_fsub_chats()` returned incomplete or empty data!")
