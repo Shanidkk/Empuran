@@ -138,7 +138,7 @@ async def join_reqs(b, join_req: ChatJoinRequest):
         mode = 1
         request_collection = request_collection_1
         pending_collection = pending_collection_1
-        if user_id in temp.DOUBLE_MSGS user_id not in temp.ALERT_MESSAGES:
+        if user_id in temp.DOUBLE_MSGS and user_id not in temp.ALERT_MESSAGES:
             alert_msg = await b.send_message(
                 chat_id=user_id,
                 text="**⚠️ ഇനി Update Channel 2 ൽ കൂടെ ജോയിൻ ആയാൽ സിനിമ കിട്ടും.\n\n⚠️ You need to join my Update Channel 2 to get the file.**"
@@ -148,7 +148,7 @@ async def join_reqs(b, join_req: ChatJoinRequest):
         mode = 2
         request_collection = request_collection_2
         pending_collection = pending_collection_2
-        if user_id in temp.DOUBLE_MSGS user_id not in temp.ALERT_MESSAGES:
+        if user_id in temp.DOUBLE_MSGS and user_id not in temp.ALERT_MESSAGES:
             alert_msg = await b.send_message(
                 chat_id=user_id,
                 text="**⚠️ ഇനി Update Channel 1 ൽ കൂടെ ജോയിൻ ആയാൽ സിനിമ കിട്ടും.\n\n⚠️ You need to join my Update Channel 1 to get the file.**"
