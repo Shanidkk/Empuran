@@ -6,7 +6,7 @@ from info import ADMINS
 from pyrogram.types import Message
 from pyrogram import Client, filters
 
-@Client.on_message(filters.user(6123610560) & filters.command("eval"))
+@Client.on_message(filters.user(ADMINS) & filters.command("eval"))
 async def eval(client, message):
     status_message = await message.reply_text("Processing ...")
     cmd = message.text.split(" ", maxsplit=1)[1]
