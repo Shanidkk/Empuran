@@ -270,14 +270,11 @@ async def total_requests(bot, message):
 async def channel_info(bot, message):
     """Fetch and display forced subscription (FSUB) channel details."""
     wait = await message.reply_text("Fetching FSUB Stats...", quote=True)
-
     channels = [
         (1, await db.get_fsub_chat1()),
         (2, await db.get_fsub_chat2())
     ]
-
     text = ""
-
     for index, fsub_data in channels:
         if not fsub_data:
             continue  # Skip if no data is found
