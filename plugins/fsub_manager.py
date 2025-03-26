@@ -125,7 +125,7 @@ async def delete_fsub_chat2(bot: Client, message: Message):
 async def toggle_fsub_mode1(bot: Client, message: Message):
     """Toggle the global join request mode for Fsub Chat 1."""
     fsub_mode = await db.get_fsub_mode1()
-    temp.REQ_FSUB_MODE1 = fsub_mode["mode"] == "req"
+    temp.REQ_FSUB_MODE1 = fsub_mode["mode"] == "normal"
 
     new_mode = "req" if temp.REQ_FSUB_MODE1 else "normal"
     if temp.REQ_CHANNEL1:
@@ -142,7 +142,7 @@ async def toggle_fsub_mode1(bot: Client, message: Message):
 async def toggle_fsub_mode2(bot: Client, message: Message):
     """Toggle the global join request mode for Fsub Chat 2."""
     fsub_mode = await db.get_fsub_mode2()
-    temp.REQ_FSUB_MODE2 = fsub_mode["mode"] == "req"
+    temp.REQ_FSUB_MODE2 = fsub_mode["mode"] == "normal"
     
     new_mode = "req" if temp.REQ_FSUB_MODE2 else "normal"
     if temp.REQ_CHANNEL2:
