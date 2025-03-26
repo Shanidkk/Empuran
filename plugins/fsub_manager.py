@@ -245,16 +245,23 @@ async def total_requests(bot, message):
         if req_channel:
             total_requests = await db.get_all_reqs_count(chat_id=int(req_channel))
             chat = await bot.get_chat(int(req_channel))
+
             # Fetch FSUB mode
             fsub_mode_data = await db.get_fsub_mode1() if i == 1 else await db.get_fsub_mode2()
             fsub_mode = fsub_mode_data["mode"] if fsub_mode_data else "Unknown"
-            # Get Join Count (If Normal Mode) or Request Count
+
+            # Get Join/Left Count (If Normal Mode) or Request Count
             if fsub_mode == "normal":
-                joined_count = await lvdb.get_stats(int(req_channel))  # How many joined
-                count_text = f"✅ **Joined Users:** {joined_count['joined']}"
+                joined_count = await lvdb.get_stats(int(req_channel))
+                count_text = (
+                    f"✅ **Joined Users:** {joined_count['joined']}\n"
+                    f"🚪 **Left Users:** {joined_count['left']}"
+                )
             else:
                 count_text = f"📌 **Total Requests:** {total_requests}"
+
             channels.append((chat, req_channel, fsub_mode, count_text))
+
     if not channels:
         return await wait.edit("❌ No request channels found!")
 
