@@ -283,8 +283,10 @@ async def channel_info(bot, message):
 
         chat_id = fsub_data.get("chat_id")
         chat = await bot.get_chat(int(chat_id))
-        fsub_type = "Request" if fsub_data.get("mode") == "req" else "Normal"
-
+        if index == 1:
+            fsub_type = "Request" if temp.REQ_FSUB_MODE1 else "Normal"
+        else:
+            fsub_type = "Request" if temp.REQ_FSUB_MODE2 else "Normal"
         text += f"""➲ **Channel Number:** REQ_CHANNEL{index}
 ➲ **ID:** `{chat.id}`
 ➲ **Title:** {chat.title}
