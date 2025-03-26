@@ -125,12 +125,6 @@ async def start(client, message):
         buttons = [[
             InlineKeyboardButton('× ᴀᴅᴅ ᴍᴇ ᴛᴏ ʏᴏᴜʀ ɢʀᴏᴜᴘs ×', url=f'http://t.me/{temp.U_NAME}?startgroup=true')
         ], [
-            InlineKeyboardButton('Cᴏᴍᴍᴜɴɪᴛʏ', callback_data='but'),
-            InlineKeyboardButton('Bᴏᴛ ɪɴғᴏ', callback_data='why')
-        ], [
-            InlineKeyboardButton('ʜᴇʟᴘ', callback_data='help'),
-            InlineKeyboardButton('ᴀʙᴏᴜᴛ', callback_data='about')
-        ],[
             InlineKeyboardButton('ᴀᴅᴍɪɴs ᴇxᴛʀᴀ ғᴇᴀᴛᴜʀᴇs', callback_data='machu')
         ]]
         reply_markup = InlineKeyboardMarkup(buttons)
